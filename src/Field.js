@@ -12,11 +12,13 @@ const Field = ({ name, control = defaultControl, label: labelText, render }) => 
     return listen(name, forceUpdate)
   }, [name])
   const formProps = {
-    store,
     value, onChange: ({ target: { value } }) => {
       store[name] = value
     }
   };
+  if (typeof control === 'function') {
+    formProps.store = store
+  }
   
   const Control = useComponent(control, {...formProps, id: name})
   const Label = useComponent(({ children, ...props }) => {

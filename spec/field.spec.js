@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React, { useState } from "react";
 import { Field, Form } from "../src/";
@@ -96,4 +96,15 @@ describe("Field", () => {
     await userEvent.type(input, "{backspace}f");
     expect(input).toHaveValue("f");
   });
+
+  describe('validator', () => {
+      test('required', async () => {
+          render(<App><Field name="f" label="F" required/></App>)
+          const input = screen.getByLabelText('F')
+          expect(screen.queryByText('required')).toBe(null)
+          expect(input).toHaveValue('a')
+          await userEvent.type(input, '{backspace}')
+          expect(screen.getByText('required')).not.toBe(null)
+      })
+  })
 });
