@@ -4,8 +4,9 @@ import useComponent from "./useComponent";
 
 const defaultControl = <input/>
 
-const Field = ({ name, control = defaultControl, label: labelText }) => {
-  const { fieldRender: render, store, listen } = useContext(Context);
+const Field = ({ name, control = defaultControl, label: labelText, render }) => {
+  const { fieldRender, store, listen } = useContext(Context);
+  const r = render || fieldRender
   const [value, forceUpdate] = useState(() => store[name])
   useEffect(() => {
     return listen(name, forceUpdate)
@@ -17,15 +18,15 @@ const Field = ({ name, control = defaultControl, label: labelText }) => {
     }
   };
   
-  const Control = useComponent(control, formProps)
+  const Control = useComponent(control, {...formProps, id: name})
   const Label = useComponent(({ children, ...props }) => {
     return (
-      <label {...props}>
+      <label {...props} htmlFor={name}>
         {labelText} {children}
       </label>
     );
   });
-  return render({ Control, Label });
+  return r({ Control, Label });
 };
 
 export default memo(Field);
