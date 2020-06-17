@@ -2,7 +2,7 @@
   "name": "@mana/form",
   "version": "0.1.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
     "test": "jest"
   },
@@ -16,7 +16,6 @@
     "@testing-library/user-event": "^11.3.2",
     "core-js": "^3.6.5",
     "jest": "^26.0.1",
-    "react": "^16.13.1",
     "react-dom": "^16.13.1"
   },
   "peerDependencies": {

@@ -1,13 +1,20 @@
-import React, { useContext, useEffect, useReducer, memo, useState } from "react";
-import { Context, listen } from "./Form";
+import React, { useContext, useEffect, memo, useState, useRef } from "react";
+import { Context } from "./Form";
 import useComponent from "./useComponent";
 
 const defaultControl = <input/>
 
-const Field = ({ name, control = defaultControl, label: labelText, render }) => {
-  const { fieldRender, store, listen } = useContext(Context);
-  const r = render || fieldRender
+const changed = (a, b) => a !== b && !(Number.isNaN(a) || Number.isNaN(b))
+
+const defaultRender = ({Control, Label, ErrorMessage}) => <div><Label><Control/></Label><ErrorMessage/></div>
+
+const Field = ({ name, control, label: labelText, render, required, validators=[] }) => {
+  const { fieldRender, store, listen, rules, control: ctxControl } = useContext(Context);
+  const r = render || fieldRender || defaultRender
+  const c = control || ctxControl || defaultControl
   const [value, forceUpdate] = useState(() => store[name])
+  const [error, setError] = useState(null)
+  const prevValue = useRef(value)
   useEffect(() => {
     return listen(name, forceUpdate)
   }, [name])
@@ -16,19 +23,47 @@ const Field = ({ name, control = defaultControl, label: labelText, render }) => 
       store[name] = value
     }
   };
-  if (typeof control === 'function') {
+  if (typeof c === 'function') {
     formProps.store = store
+    delete formProps.onChange
   }
   
-  const Control = useComponent(control, {...formProps, id: name})
+  useEffect(() => {
+    let nextError = error
+    if (changed(prevValue.current, value)) {
+      nextError = null
+      if (required ) {
+        if (!value && value !== 0) {
+          nextError ={rule: 'required'} 
+        }
+  
+      }
+      if (nextError === null) {
+        for (let validator of validators) {
+          validator = typeof validator === 'string' ? rules[validator] : validator
+          const {validate, message} = validator
+          if (!validate(value)) {
+            nextError = {message: typeof message === 'string'? message: message({label: labelText })}
+            break
+          }
+        }
+      }
+    }
+   
+    setError(nextError)
+    prevValue.current = value
+  })
+
+  const Control = useComponent(c, {...formProps, id: name})
   const Label = useComponent(({ children, ...props }) => {
     return (
       <label {...props} htmlFor={name}>
-        {labelText} {children}
+        {labelText} {required && <span style={{color: 'red'}}>*</span>}{children}
       </label>
     );
   });
-  return r({ Control, Label });
+  const ErrorMessage = useComponent(props => error && <span {...props}>{error.message ?? error.rule}</span>)
+  return r({ Control, Label, ErrorMessage });
 };
 
 export default memo(Field);

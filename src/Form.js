@@ -2,7 +2,7 @@ import React, { createContext, useRef, useMemo, useEffect } from "react";
 
 export const Context = createContext();
 
-const Form = ({ children, value, setValue, fieldRender }) => {
+const Form = ({ children, value, setValue, fieldRender, rules, control }) => {
   const vRef = useRef(value);
   const reg = useRef([])
   const pending = useRef(new Set())
@@ -26,7 +26,7 @@ const Form = ({ children, value, setValue, fieldRender }) => {
     return () => {
       reg.current = reg.current.filter(({name: n, callback: c}) => n !== name || c !== callback)
     }
-  } }), []);
+  }, rules, control }), []);
   useEffect(() => {
     for (const {name, callback} of reg.current) {
       if (pending.current.has(name)) {
@@ -35,7 +35,7 @@ const Form = ({ children, value, setValue, fieldRender }) => {
       }
     }
   })
-  return <Context.Provider value={context}>{children}</Context.Provider>;
+  return <Context.Provider value={context}>{children({})}</Context.Provider>;
 };
 
 export default Form;
