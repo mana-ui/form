@@ -8,10 +8,11 @@ const changed = (a, b) => a !== b && !(Number.isNaN(a) || Number.isNaN(b))
 
 const defaultRender = ({Control, Label, ErrorMessage}) => <div><Label><Control/></Label><ErrorMessage/></div>
 
-const Field = ({ name, control, label: labelText, render, required, validators=[] }) => {
-  const { fieldRender, store, listen, rules, control: ctxControl } = useContext(Context);
+const Field = ({ name, control, label: labelText, render, required, validators=[], rules: propRules }) => {
+  const { fieldRender, store, listen, rules: ctxRules, control: ctxControl } = useContext(Context);
   const r = render || fieldRender || defaultRender
   const c = control || ctxControl || defaultControl
+  const rules = {...ctxRules, ...propRules}
   const [value, forceUpdate] = useState(() => store[name])
   const [error, setError] = useState(null)
   const prevValue = useRef(value)
