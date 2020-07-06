@@ -9,14 +9,6 @@ const Input = (props) => {
 };
 
 describe("Form", () => {
-  it("renders children", () => {
-    render(
-      <Form value={{}}>
-        <span>form content</span>
-      </Form>
-    );
-    screen.getByText("form content");
-  });
   it("provides value & onChange for fields", async () => {
     const App = () => {
       const [value, setValue] = useState({
@@ -37,12 +29,20 @@ describe("Form", () => {
             </Label>
           )}
         >
-          <Field name="f1" label="F1" />
-          <Field name="f2" control={<Input className="f2class" />} label="F2" />
-          {/* <Field name="f3" control={({ value }) => <Input value={value + 1} />} label></Field> */}
-          {/* <Field name="f3" label="F3">
+          {() => (
+            <>
+              <Field name="f1" label="F1" />
+              <Field
+                name="f2"
+                control={<Input className="f2class" />}
+                label="F2"
+              />
+              {/* <Field name="f3" control={({ value }) => <Input value={value + 1} />} label></Field> */}
+              {/* <Field name="f3" label="F3">
           <input id="children" />
         </Field>*/}
+            </>
+          )}
         </Form>
       );
     };

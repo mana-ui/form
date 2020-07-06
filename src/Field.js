@@ -19,14 +19,15 @@ const Field = ({ name, control, label: labelText, render, required, validators=[
   useEffect(() => {
     return listen(name, forceUpdate)
   }, [name])
-  const formProps = {
-    value, onChange: ({ target: { value } }) => {
+  const formProps = {};
+  if (typeof c === 'function') {
+    formProps.get = () => value
+    formProps.set = (v) => store[name] = v
+  } else {
+    formProps.value = value
+    formProps.onChange = ({ target: { value } }) => {
       store[name] = value
     }
-  };
-  if (typeof c === 'function') {
-    formProps.store = store
-    delete formProps.onChange
   }
   
   useEffect(() => {

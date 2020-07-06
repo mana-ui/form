@@ -1,25 +1,54 @@
-import React from 'react'
-import { render, screen } from '@testing-library/react'
-import App from '../App';
-import { Field } from '../../src';
+import React from "react";
+import { render, screen } from "@testing-library/react";
+import App from "../App";
+import { Field } from "../../src";
+import userEvent from "@testing-library/user-event";
 
-const Select = ({ children, ...props}) => (
-  <select {...props}>
-    {children}
-  </select>
-)
+const Select = ({ children, ...props }) => (
+  <select {...props}>{children}</select>
+);
 
 describe("Form control component", () => {
   test("default control is `input` tag", () => {
-    const {container} = render(<App><Field name="f" label="F"/></App>)
-    expect(container).toContainHTML(`<div><label for="f">F <input id="f" value="a"></label></div>`);
+    const { container } = render(
+      <App>
+        <Field name="f" label="F" />
+      </App>
+    );
+    expect(container).toContainHTML(
+      `<div><label for="f">F <input id="f" value="a"></label></div>`
+    );
   });
   test("customize control component", () => {
-    render(<App>
-      <Field name="f" label="F1" control={<Select className="custom"><option value="a">a</option></Select>} />
-
-    </App>)
-    const ctrl = screen.getByDisplayValue('a')
-    expect(ctrl.tagName).toBe('SELECT')
+    render(
+      <App initValue={{ a: "a", b: false }}>
+        <Field
+          name="a"
+          label="A"
+          control={
+            <Select className="custom-a">
+              <option value="a">a</option>
+              <option value="b">b</option>
+            </Select>
+          }
+        />
+        <Field
+          name="b"
+          label="B"
+          control={({get, set}) => { 
+            return (
+            <input type="checkbox" checked={get()} onChange={({target: {checked}}) => {
+              set(checked)
+            }}/>
+          ) }}
+        />
+      </App>
+    );
+    const ctrlA = screen.getByLabelText('A')
+    userEvent.selectOptions(ctrlA, 'b')
+    expect(ctrlA).toHaveValue('b')
+    const ctrlB = screen.getByLabelText('B');
+    userEvent.click(ctrlB)
+    expect(ctrlB).toBeChecked()
   });
 });

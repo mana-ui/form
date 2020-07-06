@@ -30,30 +30,6 @@ describe("Field", () => {
       await userEvent.type(f1Input, "{backspace}f");
       expect(f1Input).toHaveValue("f");
     });
-    test("control as render prop with value & onChange overrided", async () => {
-      const Input = ({ val, onChange }) => (
-        <input
-          value={val}
-          onChange={({ target: { value } }) => onChange(value)}
-        />
-      );
-      render(
-        <App>
-          <Field
-            name="f"
-            label="F"
-            control={({ store }) => (
-              <Input val={store.f} onChange={(v) => (store.f = v)} />
-            )}
-          />
-        </App>
-      );
-
-      const f1Input = screen.getByLabelText("F");
-      expect(f1Input).toHaveValue("a");
-      await userEvent.type(f1Input, "{backspace}f");
-      expect(f1Input).toHaveValue("f");
-    });
   });
 
   test("render overrides fieldRender from Form", async () => {
