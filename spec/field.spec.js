@@ -2,29 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React, { useState } from "react";
 import { Field, Form } from "../src/";
-
-const App = ({ children, rules }) => {
-  const [value, setValue] = useState({ f: "a" });
-  return (
-    <Form
-      rules={rules}
-      value={value}
-      setValue={(v) => {
-        setValue(v);
-      }}
-      fieldRender={({ Control, Label, ErrorMessage }) => (
-        <>
-          <Label>
-            <Control />
-          </Label>
-          <ErrorMessage />
-        </>
-      )}
-    >
-      {children}
-    </Form>
-  );
-};
+import App from "./App";
 
 describe("Field", () => {
   describe("control", () => {
