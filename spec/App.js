@@ -1,19 +1,19 @@
-import React, { useState } from 'react'
-import { Form } from '../src';
+import React, { useState } from "react"
+import { Form } from "../src"
 
-const App = ({ children, rules, initValue= { f: "a" } }) => {
-    const [value, setValue] = useState(initValue);
-    return (
-      <Form
-        rules={rules}
-        value={value}
-        setValue={(v) => {
-          setValue(v);
-        }}
-      >
-        {() => children}
-      </Form>
-    );
-  };
+const App = ({ children, initValue = { f: "a" }, ...props }) => {
+  const [value, setValue] = useState(initValue)
+  return (
+    <Form
+      value={value}
+      setValue={(v) => {
+        setValue(v)
+      }}
+      {...props}
+    >
+      {() => children}
+    </Form>
+  )
+}
 
 export default App

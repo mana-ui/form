@@ -57,10 +57,10 @@ If your component don't receive `value` or `onChange` prop, you can use render p
         type="checkbox"
         checked={get()}
         onChange={({ target: { checked } }) => {
-          set(checked);
+          set(checked)
         }}
       />
-    );
+    )
   }}
 />
 ```
@@ -71,17 +71,57 @@ Usually fields of a form have the same layout, you can define this layout by fie
 
 ```javascript
 <Form
-  fieldRender={({ Control, Label, HelperText, id }) => (
+  fieldRender={({ Control, labelElem, id }) => (
     <div className="field">
-      <Label htmlFor={id} />
+      <label htmlFor={id} >{labelElem}</label>
       <Control id={id} />
-      <HelperText />
     </div>
   )}
 >
   <Field name="a" label="A" />
   <Field name="b" label="B" />
 </Form>
+
+<div>
+  <div class="field" >
+    <label for="a">A</label>
+    <input id="a" value="A" />
+  </div>
+  <div class="field" >
+    <label for="b">B</label>
+    <input id="b" value="B" />
+  </div>
+</div>
+```
+
+Or you can provide render to Field, which will overrides fieldRender from Form:
+
+```javascript
+const customRender = (className) => ({ Control, labelElem, id }) => (
+  <div className={className}>
+    <label htmlFor={id}>{labelElem}</label>
+    <Control id={id} />
+  </div>
+)
+
+<Form
+  value={{ a: "A", b: "B" }}
+  fieldRender={customRender("field-render")}
+>
+  <Field name="a" label="A" />
+  <Field name="b" label="B" render={customRender("field-b")} />
+</Form>
+
+<div>
+  <div class="field-render" >
+    <label for="a" />
+    <input id="a" value="A" />
+  </div>
+  <div class="field-b" >
+    <label for="b" />
+    <input id="b" value="B" />
+  </div>
+</div>
 ```
 
 ### Pass value to control
