@@ -30,15 +30,44 @@ Mana form handles four aspects of forms: view, update, validation and submit.
 
 2. customize components:
 
+You can override control component by provide control prop a react element, Field will pass `value` and `onChange` props to this react element.
+
 ```javascript
 <Field
-  name="f"
-  label="F"
-  control={<MyControl {...customProps} />}
+  name="a"
+  label="A"
+  control={
+    <Select className="custom-a">
+      <option value="a">a</option>
+      <option value="b">b</option>
+    </Select>
+  }
+/>
+```
+
+If your component don't receive `value` or `onChange` prop, you can use render prop function to render your component
+
+```javascript
+<Field
+  name="b"
+  label="B"
+  control={({ get, set }) => {
+    return (
+      <input
+        type="checkbox"
+        checked={get()}
+        onChange={({ target: { checked } }) => {
+          set(checked);
+        }}
+      />
+    );
+  }}
 />
 ```
 
 3. define form layout
+
+Usually fields of a form have the same layout, you can define this layout by fieldRender prop of Form.
 
 ```javascript
 <Form
@@ -50,8 +79,8 @@ Mana form handles four aspects of forms: view, update, validation and submit.
     </div>
   )}
 >
-    <Field name="a" label="A"/>
-    <Field name="b" label="B"/>
+  <Field name="a" label="A" />
+  <Field name="b" label="B" />
 </Form>
 ```
 

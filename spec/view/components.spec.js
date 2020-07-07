@@ -10,14 +10,13 @@ const Select = ({ children, ...props }) => (
 
 describe("Form control component", () => {
   test("default control is `input` tag", () => {
-    const { container } = render(
+    render(
       <App>
         <Field name="f" label="F" />
       </App>
     );
-    expect(container).toContainHTML(
-      `<div><label for="f">F <input id="f" value="a"></label></div>`
-    );
+    const input = screen.getByLabelText('F')
+    expect(input.tagName).toBe('INPUT')
   });
   test("customize control component", () => {
     render(
@@ -35,20 +34,25 @@ describe("Form control component", () => {
         <Field
           name="b"
           label="B"
-          control={({get, set}) => { 
+          control={({ get, set }) => {
             return (
-            <input type="checkbox" checked={get()} onChange={({target: {checked}}) => {
-              set(checked)
-            }}/>
-          ) }}
+              <input
+                type="checkbox"
+                checked={get()}
+                onChange={({ target: { checked } }) => {
+                  set(checked);
+                }}
+              />
+            );
+          }}
         />
       </App>
     );
-    const ctrlA = screen.getByLabelText('A')
-    userEvent.selectOptions(ctrlA, 'b')
-    expect(ctrlA).toHaveValue('b')
-    const ctrlB = screen.getByLabelText('B');
-    userEvent.click(ctrlB)
-    expect(ctrlB).toBeChecked()
+    const ctrlA = screen.getByLabelText("A");
+    userEvent.selectOptions(ctrlA, "b");
+    expect(ctrlA).toHaveValue("b");
+    const ctrlB = screen.getByLabelText("B");
+    userEvent.click(ctrlB);
+    expect(ctrlB).toBeChecked();
   });
 });

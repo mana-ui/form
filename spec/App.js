@@ -10,14 +10,6 @@ const App = ({ children, rules, initValue= { f: "a" } }) => {
         setValue={(v) => {
           setValue(v);
         }}
-        fieldRender={({ Control, Label, ErrorMessage }) => (
-          <>
-            <Label>
-              <Control />
-            </Label>
-            <ErrorMessage />
-          </>
-        )}
       >
         {() => children}
       </Form>
