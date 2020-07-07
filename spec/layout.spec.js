@@ -1,7 +1,7 @@
 import React from "react"
 import { render } from "@testing-library/react"
-import App from "../App"
-import Field from "../../src/Field"
+import App from "./App"
+import Field from "../src/Field"
 
 const customRender = (className) => ({ Control, labelElem, id }) => (
   <div className={className}>

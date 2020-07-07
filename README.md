@@ -10,23 +10,22 @@
 
 # Features
 
-Mana form handles four aspects of forms: view, update, validation and submit.
+Mana form handles four aspects of forms: view & update, validation and submit.
 
-- view: get values show in each fields with correct controls
-- update: update values
+- view & update: get values show in each fields with correct controls and update values correctly
 - validation: validate value restrictions & show errors
 - submit: complete form filling
 
-## View
+## View & Update
 
-### components
-
-1. Mana form provides default view components:
+1. Mana form provides default view components, and inject `value` and `onChange`:
 
 ```javascript
  <Field name="f" label="F">
 // render as <div><label for="f">F <input id="f" value="a"></label></div>
 ```
+
+value is fetched by name or path, onChange is same as plain `input` onChange prop
 
 2. customize components:
 
@@ -123,18 +122,6 @@ const customRender = (className) => ({ Control, labelElem, id }) => (
   </div>
 </div>
 ```
-
-### Pass value to control
-
-1.  pass value to Field by name:
-
-```javascript
-  <Field name="f">
-```
-
-2.  pass value to Field
-
-## Update
 
 ## Validation & Errors
 
