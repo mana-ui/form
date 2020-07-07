@@ -9,6 +9,7 @@ devDependencies:
   eslint-plugin-jest: 23.18.0_eslint@7.4.0
   eslint-plugin-react: 7.20.3_eslint@7.4.0
   jest: 26.0.1
+  prettier: 2.0.5
   react-dom: 16.13.1
 lockfileVersion: 5.1
 packages:
@@ -4432,6 +4433,13 @@ packages:
       node: '>= 0.8.0'
     resolution:
       integrity: sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==
+  /prettier/2.0.5:
+    dev: true
+    engines:
+      node: '>=10.13.0'
+    hasBin: true
+    resolution:
+      integrity: sha512-7PtVymN48hGcO4fGjybyBSIWDsLU4H4XlvOHfq91pz9kkGlonzwTfYkaIEwiRg/dAJF9YlbsduBAgtYLi+8cFg==
   /pretty-format/25.5.0:
     dependencies:
       '@jest/types': 25.5.0
@@ -5645,4 +5653,5 @@ specifiers:
   eslint-plugin-jest: ^23.18.0
   eslint-plugin-react: ^7.20.3
   jest: ^26.0.1
+  prettier: ^2.0.5
   react-dom: ^16.13.1
