@@ -18,11 +18,21 @@
     "eslint": "^7.4.0",
     "eslint-plugin-jest": "^23.18.0",
     "eslint-plugin-react": "^7.20.3",
+    "husky": "^4.2.5",
     "jest": "^26.0.1",
     "prettier": "^2.0.5",
     "react-dom": "^16.13.1"
   },
   "peerDependencies": {
     "react": "^16.13.1"
+  },
+  "lint-staged": {
+    "*.js": ["eslint --fix", "jest --findRelatedTests"],
+    "*.{js,md}": "prettier --write"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
   }
 }
