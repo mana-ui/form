@@ -2,6 +2,15 @@ import React, { useContext, useEffect, memo, useState, useRef } from "react"
 import { Context } from "./Form"
 import useComponent from "./useComponent"
 
+const get = (store, path) => {
+  let v
+  for (const k of path) {
+    v = store[k]
+    store = v
+  }
+  return v
+}
+
 const defaultControl = <input />
 
 const changed = (a, b) => a !== b && !(Number.isNaN(a) || Number.isNaN(b))
@@ -28,13 +37,16 @@ const Field = ({
     fieldRender,
     store,
     listen,
+    path: ctxPath,
     rules: ctxRules,
     control: ctxControl,
   } = useContext(Context)
+  const path = [...ctxPath, name]
   const r = render || fieldRender || defaultRender
   const c = control || ctxControl || defaultControl
   const rules = { ...ctxRules, ...propRules }
-  const [value, forceUpdate] = useState(() => store[name])
+
+  const [value, forceUpdate] = useState(() => get(store, path))
   const [error, setError] = useState(null)
   const prevValue = useRef(value)
   useEffect(() => {

@@ -1,41 +1,73 @@
-import React, { createContext, useRef, useMemo, useEffect } from "react";
+import React, { createContext, useRef, useMemo, useEffect } from "react"
 
-export const Context = createContext();
+export const Context = createContext()
 
 const Form = ({ children, value, setValue, fieldRender, rules, control }) => {
-  const vRef = useRef(value);
+  const vRef = useRef(value)
   const reg = useRef([])
   const pending = useRef(new Set())
   vRef.current = value
   const store = useMemo(() => {
     const proxy = new Proxy(vRef, {
       get(target, property) {
-        return target.current[property];
+        return target.current[property]
       },
       set(target, property, value) {
-        setValue({...target.current, [property]: value})
+        setValue({ ...target.current, [property]: value })
         pending.current.add(property)
         return true
       },
-      
-    });
-    return proxy;
-  }, []);
-  const context = useMemo(() => ({ store, fieldRender, listen: (name, callback) => {
-    reg.current = [...reg.current, {name, callback}]
-    return () => {
-      reg.current = reg.current.filter(({name: n, callback: c}) => n !== name || c !== callback)
+    })
+    return proxy
+  }, [])
+
+const get = (path) => {
+  let v, s = store
+  for (const k of path) {
+    v = s[k]
+    s = v
+  }
+  return v
+}
+
+  const set = (v, path ) => {
+    const name = path.pop()
+    let s = value
+    for (const k of path) {
+      s = s[k]
     }
-  }, rules, control }), []);
+    s[name] = v
+    setValue(value)
+  }
+
+  const context = useMemo(
+    () => ({
+      get,
+      set,
+      fieldRender,
+      listen: (name, callback) => {
+        reg.current = [...reg.current, { name, callback }]
+        return () => {
+          reg.current = reg.current.filter(
+            ({ name: n, callback: c }) => n !== name || c !== callback,
+          )
+        }
+      },
+      rules,
+      control,
+      path: [],
+    }),
+    [],
+  )
   useEffect(() => {
-    for (const {name, callback} of reg.current) {
+    for (const { name, callback } of reg.current) {
       if (pending.current.has(name)) {
         pending.current.delete(name)
         callback(store[name])
       }
     }
   })
-  return <Context.Provider value={context}>{children({})}</Context.Provider>;
-};
+  return <Context.Provider value={context}>{children({})}</Context.Provider>
+}
 
-export default Form;
+export default Form
