@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, memo, useState, useRef } from "react"
 import { Context } from "./Form"
 import useComponent from "./useComponent"
+import { join } from "./path"
 
 const defaultControl = <input />
 
@@ -26,28 +27,32 @@ const Field = ({
 }) => {
   const {
     fieldRender,
-    store,
+    get,
+    set,
     listen,
+    path: ctxPath,
     rules: ctxRules,
     control: ctxControl,
   } = useContext(Context)
   const r = render || fieldRender || defaultRender
   const c = control || ctxControl || defaultControl
   const rules = { ...ctxRules, ...propRules }
-  const [value, forceUpdate] = useState(() => store[name])
+
+  const fullPath = join(ctxPath, name)
+  const [value, forceUpdate] = useState(() => get(fullPath))
   const [error, setError] = useState(null)
   const prevValue = useRef(value)
   useEffect(() => {
-    return listen(name, forceUpdate)
+    return listen(fullPath, forceUpdate)
   }, [name])
   const formProps = {}
   if (typeof c === "function") {
     formProps.get = () => value
-    formProps.set = (v) => (store[name] = v)
+    formProps.set = (v) => set(v, fullPath)
   } else {
     formProps.value = value
     formProps.onChange = ({ target: { value } }) => {
-      store[name] = value
+      set(value, fullPath)
     }
   }
 

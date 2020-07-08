@@ -32,7 +32,7 @@ describe("validator", () => {
     )
     const input = screen.getByLabelText(/F/)
     await userEvent.type(input, "{backspace}abcdefg")
-    expect(screen.getByText("F exceeds max length"))
+    expect(screen.getByText("F exceeds max length")).toBeInTheDocument()
   })
   test("function", async () => {
     render(
