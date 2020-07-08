@@ -1,12 +1,13 @@
-import React, { useContext } from 'react'
-import { Context } from './Form'
+import React, { useContext } from "react"
+import { Context } from "./Form"
+import { join } from "path"
 
-const FieldSet = ({children, name}) => {
-   const context = useContext(Context)
+const FieldSet = ({ children, name }) => {
+  const ctx = useContext(Context)
   return (
-      <Context.Provider value={{...context, path: [name]}}>
-          {children}
-      </Context.Provider>
+    <Context.Provider value={{ ...ctx, path: join(ctx.path, name) }}>
+      {children}
+    </Context.Provider>
   )
 }
 

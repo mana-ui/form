@@ -7,37 +7,28 @@ const Form = ({ children, value, setValue, fieldRender, rules, control }) => {
   const reg = useRef([])
   const pending = useRef(new Set())
   vRef.current = value
-  const store = useMemo(() => {
-    const proxy = new Proxy(vRef, {
-      get(target, property) {
-        return target.current[property]
-      },
-      set(target, property, value) {
-        setValue({ ...target.current, [property]: value })
-        pending.current.add(property)
-        return true
-      },
-    })
-    return proxy
-  }, [])
 
-const get = (path) => {
-  let v, s = store
-  for (const k of path) {
-    v = s[k]
-    s = v
+  const get = (fullPath) => {
+    let v,
+      s = value
+    const pathes = fullPath.split(".")
+    for (const k of pathes) {
+      v = s[k]
+      s = v
+    }
+    return v
   }
-  return v
-}
 
-  const set = (v, path ) => {
-    const name = path.pop()
+  const set = (v, fullPath) => {
+    const pathes = fullPath.split(".")
+    const name = pathes.pop()
     let s = value
-    for (const k of path) {
+    for (const k of pathes) {
       s = s[k]
     }
     s[name] = v
     setValue(value)
+    pending.current.add(fullPath)
   }
 
   const context = useMemo(
@@ -45,25 +36,25 @@ const get = (path) => {
       get,
       set,
       fieldRender,
-      listen: (name, callback) => {
-        reg.current = [...reg.current, { name, callback }]
+      listen: (fullPath, callback) => {
+        reg.current = [...reg.current, { fullPath, callback }]
         return () => {
           reg.current = reg.current.filter(
-            ({ name: n, callback: c }) => n !== name || c !== callback,
+            ({ name: n, callback: c }) => n !== fullPath || c !== callback,
           )
         }
       },
       rules,
       control,
-      path: [],
+      path: "",
     }),
     [],
   )
   useEffect(() => {
-    for (const { name, callback } of reg.current) {
-      if (pending.current.has(name)) {
-        pending.current.delete(name)
-        callback(store[name])
+    for (const { fullPath, callback } of reg.current) {
+      if (pending.current.has(fullPath)) {
+        pending.current.delete(fullPath)
+        callback(get(fullPath))
       }
     }
   })
