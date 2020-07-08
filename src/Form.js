@@ -2,7 +2,14 @@ import React, { createContext, useRef, useMemo, useEffect } from "react"
 
 export const Context = createContext()
 
-const Form = ({ children, value, setValue, fieldRender, rules, control }) => {
+const Form = ({
+  children,
+  value,
+  setValue,
+  fieldRender,
+  validators,
+  control,
+}) => {
   const vRef = useRef(value)
   const reg = useRef([])
   const pending = useRef(new Set())
@@ -44,7 +51,7 @@ const Form = ({ children, value, setValue, fieldRender, rules, control }) => {
           )
         }
       },
-      rules,
+      validators,
       control,
       path: "",
     }),

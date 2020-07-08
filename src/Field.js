@@ -16,28 +16,30 @@ const defaultRender = ({ Control, labelElem, ErrorMessage }) => (
   </div>
 )
 
-const Field = ({
-  name,
-  control,
-  label: labelElem,
-  render,
-  required,
-  validators = [],
-  rules: propRules,
-}) => {
+const Field = (props) => {
+  const {
+    name,
+    control,
+    label: labelElem,
+    render,
+    validators = {},
+    ...rules
+  } = props
   const {
     fieldRender,
     get,
     set,
     listen,
     path: ctxPath,
-    rules: ctxRules,
     control: ctxControl,
+    validators: ctxValidators,
   } = useContext(Context)
   const r = render || fieldRender || defaultRender
   const c = control || ctxControl || defaultControl
-  const rules = { ...ctxRules, ...propRules }
-
+  const v = {
+    ...ctxValidators,
+    ...validators,
+  }
   const fullPath = join(ctxPath, name)
   const [value, forceUpdate] = useState(() => get(fullPath))
   const [error, setError] = useState(null)
@@ -60,38 +62,23 @@ const Field = ({
     let nextError = error
     if (changed(prevValue.current, value)) {
       nextError = null
-      if (required) {
-        if (!value && value !== 0) {
-          nextError = { rule: "required" }
-        }
-      }
-      if (nextError === null) {
-        for (let validator of validators) {
-          validator =
-            typeof validator === "string" ? rules[validator] : validator
-          const { validate, message } = validator
-          if (!validate(value)) {
-            nextError = {
-              message:
-                typeof message === "string"
-                  ? message
-                  : message({ label: labelElem }),
-            }
-            break
-          }
+      for (const [rule, param] of Object.entries(rules)) {
+        const message = v[rule]?.(value, param)
+        if (message) {
+          nextError = message
+          break
         }
       }
     }
-
     setError(nextError)
     prevValue.current = value
   })
 
   const Control = useComponent(c, formProps)
   const ErrorMessage = useComponent(
-    (props) => error && <span {...props}>{error.message ?? error.rule}</span>,
+    (props) => error && <span {...props}>{error}</span>,
   )
-  return r({ Control, labelElem, ErrorMessage, id: name })
+  return r({ Control, labelElem, ErrorMessage, id: name }, props)
 }
 
 export default memo(Field)

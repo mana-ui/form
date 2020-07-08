@@ -5,52 +5,50 @@ import { Field } from "../src/"
 import App from "./App"
 
 describe("validator", () => {
-  const maxLength = {
-    validate: (v) => v.length <= 5,
-    message: ({ label }) => <>{label} exceeds max length</>,
-  }
-  const minLength = { validate: (v) => v.length >= 3, message: "min length" }
-  test("required", async () => {
-    render(
-      <App>
-        <Field name="f" label="F" required />
-      </App>,
-    )
-    const input = screen.getByLabelText(/F/)
-    expect(screen.queryByText("required")).toBe(null)
-    expect(input).toHaveValue("a")
-    await userEvent.type(input, "{backspace}")
-    expect(screen.getByText("required")).not.toBe(null)
-    await userEvent.type(input, "x")
-    expect(screen.queryByText("required")).toBe(null)
-  })
   test("inline validator", async () => {
     render(
       <App>
-        <Field name="f" label="F" validators={[maxLength]} />
-      </App>,
-    )
-    const input = screen.getByLabelText(/F/)
-    await userEvent.type(input, "{backspace}abcdefg")
-    expect(screen.getByText("F exceeds max length")).toBeInTheDocument()
-  })
-  test("function", async () => {
-    render(
-      <App rules={{ maxLength, minLength }}>
         <Field
           name="f"
           label="F"
+          validators={{
+            required: (v) => v === "" && "F is required",
+            maxLength: (v, max) => v.length > max && "F exceeds max length",
+          }}
           required
-          validators={["maxLength", "minLength"]}
+          maxLength={5}
         />
       </App>,
     )
     const input = screen.getByLabelText(/F/)
     await userEvent.type(input, "{backspace}")
-    expect(screen.getByText("required")).not.toBe(null)
-    await userEvent.type(input, "a")
-    expect(screen.getByText("min length")).not.toBe(null)
-    await userEvent.type(input, "bcdefg")
-    expect(screen.getByText("F exceeds max length")).not.toBe(null)
+    expect(screen.getByText("F is required")).toBeInTheDocument()
+    await userEvent.type(input, "abc")
+    expect(screen.queryByText("F is required")).not.toBeInTheDocument()
+    await userEvent.type(input, "def")
+    expect(screen.getByText("F exceeds max length")).toBeInTheDocument()
+    await userEvent.type(input, "{backspace}")
+    expect(screen.queryByText("F exceeds max length")).not.toBeInTheDocument()
+  })
+  test("validators from higher component", async () => {
+    render(
+      <App
+        validators={{
+          required: (v) => v === "" && "F is required",
+          maxLength: (v, max) => v.length > max && "F exceeds max length",
+        }}
+      >
+        <Field name="f" label="F" required maxLength={5} />
+      </App>,
+    )
+    const input = screen.getByLabelText(/F/)
+    await userEvent.type(input, "{backspace}")
+    expect(screen.getByText("F is required")).toBeInTheDocument()
+    await userEvent.type(input, "abc")
+    expect(screen.queryByText("F is required")).not.toBeInTheDocument()
+    await userEvent.type(input, "def")
+    expect(screen.getByText("F exceeds max length")).toBeInTheDocument()
+    await userEvent.type(input, "{backspace}")
+    expect(screen.queryByText("F exceeds max length")).not.toBeInTheDocument()
   })
 })
