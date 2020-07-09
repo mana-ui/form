@@ -50,7 +50,7 @@ const Field = (props) => {
   const formProps = {}
   if (typeof c === "function") {
     formProps.get = () => value
-    formProps.set = (v) => set(v, fullPath)
+    formProps.set = (v, n = name) => set(v, join(ctxPath, n))
   } else {
     formProps.value = value
     formProps.onChange = ({ target: { value } }) => {

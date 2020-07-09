@@ -43,8 +43,8 @@ describe("Form control component", () => {
       </App>,
     )
     const inputA = screen.getByLabelText("A")
-    await userEvent.type(inputA, "a")
-    expect(inputA).toHaveValue("a")
+    await userEvent.type(inputA, "abc")
+    expect(inputA).toHaveValue("abc")
 
     const selectB = screen.getByLabelText("B")
     expect(selectB).toHaveClass("custom-b")
