@@ -61,7 +61,8 @@ const Form = ({
     for (const { fullPath, callback } of reg.current) {
       if (pending.current.has(fullPath)) {
         pending.current.delete(fullPath)
-        callback(get(fullPath))
+        const v = get(fullPath)
+        callback(v)
       }
     }
   })

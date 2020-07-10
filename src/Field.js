@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, memo, useState, useRef } from "react"
+import React, { useContext, useEffect, useState, useRef } from "react"
 import { Context } from "./Form"
 import useComponent from "./useComponent"
 import { join } from "./path"
@@ -7,12 +7,12 @@ const defaultControl = <input />
 
 const changed = (a, b) => a !== b && !(Number.isNaN(a) || Number.isNaN(b))
 
-const defaultRender = ({ Control, labelElem, ErrorMessage }) => (
+const defaultRender = ({ Control, labelElem, error }) => (
   <div>
     <label>
       {labelElem} <Control />
     </label>
-    <ErrorMessage />
+    {error}
   </div>
 )
 
@@ -75,10 +75,7 @@ const Field = (props) => {
   })
 
   const Control = useComponent(c, formProps)
-  const ErrorMessage = useComponent(
-    (props) => error && <span {...props}>{error}</span>,
-  )
-  return r({ Control, labelElem, ErrorMessage, id: name }, props)
+  return r({ Control, labelElem, error, id: name }, props)
 }
 
-export default memo(Field)
+export default Field
