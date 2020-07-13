@@ -1,4 +1,4 @@
-import React, { createContext, useRef, useMemo, useLayoutEffect } from "react"
+import React, { createContext, useRef, useMemo, useEffect } from "react"
 
 export const Context = createContext()
 
@@ -57,7 +57,7 @@ const Form = ({
     }),
     [],
   )
-  useLayoutEffect(() => {
+  useEffect(() => {
     for (const { fullPath, instance } of reg.current) {
       if (pending.current.has(fullPath)) {
         pending.current.delete(fullPath)

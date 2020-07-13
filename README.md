@@ -77,8 +77,12 @@ Usually fields of a form have the same layout, you can define this layout by fie
     </div>
   )}
 >
-  <Field name="a" label="A" />
-  <Field name="b" label="B" />
+  {() => {
+    <>
+      <Field name="a" label="A" />
+      <Field name="b" label="B" />
+    </>
+  }}
 </Form>
 
 <div>
@@ -107,8 +111,12 @@ const customRender = (className) => ({ Control, labelElem, id }) => (
   value={{ a: "A", b: "B" }}
   fieldRender={customRender("field-render")}
 >
-  <Field name="a" label="A" />
-  <Field name="b" label="B" render={customRender("field-b")} />
+  {() => (
+    <>
+      <Field name="a" label="A" />
+      <Field name="b" label="B" render={customRender("field-b")} />
+    </>
+  )}
 </Form>
 
 <div>
@@ -125,4 +133,51 @@ const customRender = (className) => ({ Control, labelElem, id }) => (
 
 ## Validation & Errors
 
+You may define validators by `validators` prop, and use validators by props other than Field used props:
+
+```javascript
+<Form
+  fieldRender={({ labelElem, Control, error }) => (
+    <div>
+      <label>{labelElem}</label>
+      <div>
+        <Control />
+        {error}
+      </div>
+    </div>
+  )}
+>
+  {() => (
+    <Field
+      name="f"
+      label="F"
+      validators={{
+        required: (v) => v === "" && "F is required",
+        maxLength: (v, max) => v.length > max && "F exceeds max length",
+      }}
+      required
+      maxLength={5}
+    />
+  )}
+</Form>
+```
+
+A validator is a function return a message when a rule is not fullfilled. A validator is applied when a prop same as the key and it is called with the prop value. Appled validators on a Field will be called by chronological order defined on props.
+
+You can decide how error is shown by fieldRender.
+
 ## Submit
+
+Form provide sumbit callback by children render prop, when it's called, all applyed validators get invoked, if anyone fails, onSubmit is skipped, otherwise onSubmit is called with form data.
+
+```javascript
+<Form value={{ a: "x", b: "y" }} onSubmit={({value} => {})}>
+  {({ submit }) => (
+    <>
+      <Field name="a" label="A" />
+      <Field name="b" label="B" />
+      <button onClick={submit}>submit</button>
+    </>
+  )}
+</Form>
+```
