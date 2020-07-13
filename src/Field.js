@@ -89,7 +89,7 @@ const Field = (props) => {
   })
 
   const Control = useComponent(c, formProps)
-  return r({ Control, labelElem, error, id: name }, props)
+  return r({ Control, labelElem, error, id: fullPath }, props)
 }
 
 export default Field
