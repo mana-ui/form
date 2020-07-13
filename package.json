@@ -1,5 +1,5 @@
 {
-  "name": "@mana/form",
+  "name": "@mana-ui/form",
   "version": "0.1.0",
   "description": "",
   "main": "src/index.js",
