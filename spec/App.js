@@ -17,7 +17,7 @@ const App = ({
       }}
       {...props}
     >
-      {() => children}
+      {(args) => (typeof children === "function" ? children(args) : children)}
     </Form>
   )
 }

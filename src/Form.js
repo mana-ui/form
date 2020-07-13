@@ -1,4 +1,4 @@
-import React, { createContext, useRef, useMemo, useEffect } from "react"
+import React, { createContext, useRef, useMemo, useLayoutEffect } from "react"
 
 export const Context = createContext()
 
@@ -9,6 +9,7 @@ const Form = ({
   fieldRender,
   validators,
   control,
+  onSubmit,
 }) => {
   const vRef = useRef(value)
   const reg = useRef([])
@@ -43,12 +44,11 @@ const Form = ({
       get,
       set,
       fieldRender,
-      listen: (fullPath, callback) => {
-        reg.current = [...reg.current, { fullPath, callback }]
+      listen: (fullPath, instance) => {
+        const item = { fullPath, instance }
+        reg.current = [...reg.current, item]
         return () => {
-          reg.current = reg.current.filter(
-            ({ name: n, callback: c }) => n !== fullPath || c !== callback,
-          )
+          reg.current = reg.current.filter((i) => i !== item)
         }
       },
       validators,
@@ -57,16 +57,30 @@ const Form = ({
     }),
     [],
   )
-  useEffect(() => {
-    for (const { fullPath, callback } of reg.current) {
+  useLayoutEffect(() => {
+    for (const { fullPath, instance } of reg.current) {
       if (pending.current.has(fullPath)) {
         pending.current.delete(fullPath)
         const v = get(fullPath)
-        callback(v)
+        instance.current.update(v)
       }
     }
   })
-  return <Context.Provider value={context}>{children({})}</Context.Provider>
+  const submit = () => {
+    let allValid = true
+    for (const { instance } of reg.current) {
+      const error = instance.current.validate()
+      if (error) {
+        allValid = false
+      }
+    }
+    if (allValid) {
+      onSubmit({ value })
+    }
+  }
+  return (
+    <Context.Provider value={context}>{children({ submit })}</Context.Provider>
+  )
 }
 
 export default Form

@@ -1,4 +1,10 @@
-import React, { useContext, useEffect, useState, useRef } from "react"
+import React, {
+  useContext,
+  useEffect,
+  useState,
+  useRef,
+  useImperativeHandle,
+} from "react"
 import { Context } from "./Form"
 import useComponent from "./useComponent"
 import { join } from "./path"
@@ -44,9 +50,26 @@ const Field = (props) => {
   const [value, forceUpdate] = useState(() => get(fullPath))
   const [error, setError] = useState(null)
   const prevValue = useRef(value)
+  const instance = useRef()
+  const validate = () => {
+    let error = null
+    for (const [rule, param] of Object.entries(rules)) {
+      const message = v[rule]?.(value, param)
+      if (message) {
+        error = message
+        break
+      }
+    }
+    setError(error)
+    return error
+  }
+  useImperativeHandle(instance, () => ({
+    update: forceUpdate,
+    validate,
+  }))
   useEffect(() => {
-    return listen(fullPath, forceUpdate)
-  }, [name])
+    return listen(fullPath, instance)
+  }, [fullPath])
   const formProps = {}
   if (typeof c === "function") {
     formProps.get = () => value
@@ -59,18 +82,9 @@ const Field = (props) => {
   }
 
   useEffect(() => {
-    let nextError = error
     if (changed(prevValue.current, value)) {
-      nextError = null
-      for (const [rule, param] of Object.entries(rules)) {
-        const message = v[rule]?.(value, param)
-        if (message) {
-          nextError = message
-          break
-        }
-      }
+      validate()
     }
-    setError(nextError)
     prevValue.current = value
   })
 
