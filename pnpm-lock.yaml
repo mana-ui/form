@@ -8,6 +8,7 @@ devDependencies:
   eslint: 7.4.0
   eslint-plugin-jest: 23.18.0_eslint@7.4.0
   eslint-plugin-react: 7.20.3_eslint@7.4.0
+  eslint-plugin-react-hooks: 4.0.8_eslint@7.4.0
   husky: 4.2.5
   jest: 26.1.0
   lint-staged: 10.2.11
@@ -2390,6 +2391,16 @@ packages:
       eslint: '>=5'
     resolution:
       integrity: sha512-wLPM/Rm1SGhxrFQ2TKM/BYsYPhn7ch6ZEK92S2o/vGkAAnDXM0I4nTIo745RIX+VlCRMFgBuJEax6XfTHMdeKg==
+  /eslint-plugin-react-hooks/4.0.8_eslint@7.4.0:
+    dependencies:
+      eslint: 7.4.0
+    dev: true
+    engines:
+      node: '>=10'
+    peerDependencies:
+      eslint: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0
+    resolution:
+      integrity: sha512-6SSb5AiMCPd8FDJrzah+Z4F44P2CdOaK026cXFV+o/xSRzfOiV1FNFeLl2z6xm3yqWOQEZ5OfVgiec90qV2xrQ==
   /eslint-plugin-react/7.20.3_eslint@7.4.0:
     dependencies:
       array-includes: 3.1.1
@@ -5852,6 +5863,7 @@ specifiers:
   eslint: ^7.4.0
   eslint-plugin-jest: ^23.18.0
   eslint-plugin-react: ^7.20.3
+  eslint-plugin-react-hooks: ^4.0.8
   husky: ^4.2.5
   jest: ^26.1.0
   lint-staged: ^10.2.11
