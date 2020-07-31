@@ -1,7 +1,12 @@
-import React, { createContext, useRef, useMemo, useEffect } from "react"
+import React, { createContext, useRef, useMemo } from "react"
 
 export const Context = createContext()
 
+const init = (reg, key) => {
+  const instances = []
+  reg.set(key, instances)
+  return instances
+}
 const Form = ({
   children,
   value,
@@ -12,19 +17,18 @@ const Form = ({
   onSubmit,
 }) => {
   const vRef = useRef(value)
-  const reg = useRef([])
-  const pending = useRef(new Set())
+  const reg = useRef(new Map())
   vRef.current = value
 
   const get = (fullPath) => {
     let v,
       s = value
-    const pathes = fullPath.split(".")
+    const pathes = fullPath.split(".").filter(Boolean)
     for (const k of pathes) {
       v = s[k]
       s = v
     }
-    return v
+    return v ?? s
   }
 
   const set = (v, fullPath) => {
@@ -36,42 +40,44 @@ const Form = ({
     }
     s[name] = v
     setValue(value)
-    pending.current.add(fullPath)
+    const instances = reg.current.get(fullPath)
+    for (const instance of instances) {
+      instance.current.update(v)
+    }
   }
-
   const context = useMemo(
     () => ({
+      depth: 0,
       get,
       set,
       fieldRender,
-      listen: (fullPath, instance) => {
-        const item = { fullPath, instance }
-        reg.current = [...reg.current, item]
+      register: (instance) => {
+        const register = reg.current
+        const { fullPath } = instance.current
+        const instances = register.get(fullPath) ?? init(register, fullPath)
+        instances.push(instance)
         return () => {
-          reg.current = reg.current.filter((i) => i !== item)
+          const i = instances.findIndex((x) => x === instance)
+          instances.splice(i, 1)
         }
       },
       validators,
       control,
       path: "",
+      notify: () => {},
     }),
     [],
   )
-  useEffect(() => {
-    for (const { fullPath, instance } of reg.current) {
-      if (pending.current.has(fullPath)) {
-        pending.current.delete(fullPath)
-        const v = get(fullPath)
-        instance.current.update(v)
-      }
-    }
-  })
   const submit = () => {
     let allValid = true
-    for (const { instance } of reg.current) {
-      const error = instance.current.validate()
-      if (error) {
-        allValid = false
+    for (const instances of reg.current.values()) {
+      for (const { current } of instances) {
+        if (current.depth === 0) {
+          const error = current.validate()
+          if (error) {
+            allValid = false
+          }
+        }
       }
     }
     if (allValid) {
