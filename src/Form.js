@@ -1,12 +1,9 @@
 import React, { createContext, useRef, useMemo } from "react"
+import Observer from "./Observer"
+import { UPDATE, SUBMIT } from "./events"
 
 export const Context = createContext()
 
-const init = (reg, key) => {
-  const instances = []
-  reg.set(key, instances)
-  return instances
-}
 const Form = ({
   children,
   value,
@@ -16,8 +13,8 @@ const Form = ({
   control,
   onSubmit,
 }) => {
+  const observerRef = useRef(new Observer())
   const vRef = useRef(value)
-  const reg = useRef(new Map())
   vRef.current = value
 
   const get = (fullPath) => {
@@ -40,49 +37,27 @@ const Form = ({
     }
     s[name] = v
     setValue(value)
-    const instances = reg.current.get(fullPath)
-    for (const instance of instances) {
-      instance.current.update(v)
-    }
+    observerRef.current.emit(UPDATE, fullPath)
   }
   const context = useMemo(
     () => ({
-      depth: 0,
+      observer: observerRef.current,
+      unsubSubmit: () => {},
       get,
       set,
       fieldRender,
-      register: (instance) => {
-        const register = reg.current
-        const { fullPath } = instance.current
-        const instances = register.get(fullPath) ?? init(register, fullPath)
-        instances.push(instance)
-        return () => {
-          const i = instances.findIndex((x) => x === instance)
-          instances.splice(i, 1)
-        }
-      },
       validators,
       control,
       path: "",
-      notify: () => {},
     }),
     [],
   )
-  const submit = () => {
-    let allValid = true
-    for (const instances of reg.current.values()) {
-      for (const { current } of instances) {
-        if (current.depth === 0) {
-          const error = current.validate()
-          if (error) {
-            allValid = false
-          }
-        }
-      }
-    }
-    if (allValid) {
+  const submit = async () => {
+    try {
+      await observerRef.current.emit(SUBMIT, "")
       onSubmit({ value })
-    }
+      // eslint-disable-next-line no-empty
+    } catch (e) {}
   }
   return (
     <Context.Provider value={context}>{children({ submit })}</Context.Provider>

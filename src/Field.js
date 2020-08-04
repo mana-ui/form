@@ -24,7 +24,7 @@ const Field = (props) => {
     validators = {},
     ...rules
   } = props
-  const {context, value, error, ctxPath } = useField(name, validators, rules)
+  const { context, value, error, ctxPath } = useField(name, validators, rules)
   const r = render || context.fieldRender || defaultRender
   const c = control || context.ctxControl || defaultControl
   const formProps = {}

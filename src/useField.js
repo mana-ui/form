@@ -1,36 +1,31 @@
-import {
-  useContext,
-  useState,
-  useEffect,
-  useRef,
-  useImperativeHandle,
-  useCallback,
-} from "react"
+import { useContext, useState, useEffect, useRef } from "react"
 import { Context } from "./Form"
 import { join } from "./path"
-
-const changed = (a, b) => a !== b && !(Number.isNaN(a) || Number.isNaN(b))
+import { UPDATE, SUBMIT, VALIDATE } from "./events"
 
 export default function useField(name, validators, rules) {
   const context = useContext(Context)
-  const {
-    depth,
-    get,
-    register: ctxRegister,
-    path: ctxPath,
-    validators: ctxValidators,
-    notify,
-  } = context
+  const { observer, get, path: ctxPath, validators: ctxValidators } = context
   const v = {
     ...ctxValidators,
     ...validators,
   }
   const fullPath = join(ctxPath, name)
   const forceUpdate = useState([])[1]
+  useEffect(() =>
+    observer.listen(UPDATE, fullPath, () => {
+      forceUpdate([])
+    }),
+  )
+  const handleSubmit = async () => {
+    await observer.emit(SUBMIT, fullPath)
+    return selfValidate()
+  }
+  useEffect(() => observer.listen(SUBMIT, ctxPath, handleSubmit))
+  useEffect(() => observer.listen(VALIDATE, fullPath, validate))
   const value = get(fullPath)
-  const prevValue = useRef(value)
   const [error, setError] = useState(null)
-  const validate = () => {
+  const selfValidate = () => {
     let error = null
     for (const [rule, param] of Object.entries(rules)) {
       const message = v[rule]?.(value, param)
@@ -39,50 +34,27 @@ export default function useField(name, validators, rules) {
         break
       }
     }
-    setError(error)
-    return error
-  }
 
-  const instance = useRef()
-  const children = useRef([])
-  useImperativeHandle(instance, () => ({
-    depth,
-    name,
-    fullPath,
-    update: () => forceUpdate([]),
-    validate,
-    children,
-  }))
+    setError(error)
+    if (error) throw error
+  }
+  const validate = async () => {
+    try {
+      selfValidate()
+      return observer.emit(VALIDATE, ctxPath)
+      // eslint-disable-next-line no-empty
+    } catch (e) {}
+  }
+  const mounted = useRef(false)
   useEffect(() => {
-    return ctxRegister(instance)
-  }, [ctxRegister])
-  useEffect(() => {
-    if (changed(prevValue.current, value)) {
-      const error = validate()
-      if (error === null) {
-        notify()
-      }
-    }
-    prevValue.current = value
+    if (mounted.current) validate()
+    mounted.current = true
   })
-  const register = useCallback((childInstance) => {
-    const unregister = ctxRegister(childInstance)
-    children.current.push(childInstance)
-    return () => {
-      unregister()
-      children.current = children.current.filter((i) => i !== childInstance)
-    }
-  }, [])
   return {
     error,
     context: {
       ...context,
-      depth: depth + 1,
       path: fullPath,
-      register,
-      notify: () => {
-        validate()
-      },
     },
     value,
     ctxPath,

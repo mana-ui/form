@@ -1,13 +1,21 @@
-import { fireEvent, render, screen } from "@testing-library/react"
+import { render, screen } from "@testing-library/react"
 import React from "react"
 import Field from "../src/Field"
 import App from "./App"
+import userEvent from "@testing-library/user-event"
+
+const flushPromises = () => new Promise(window.setImmediate)
 
 describe("Form submission", () => {
-  test("onSubmti get value", () => {
+  test("onSubmti get value", async () => {
     const handleSubmit = jest.fn()
     render(
-      <App initValue={{ a: "x", b: "y" }} onSubmit={handleSubmit}>
+      <App
+        initValue={{ a: "x", b: "y" }}
+        onSubmit={(v) => {
+          handleSubmit(v)
+        }}
+      >
         {({ submit }) => (
           <>
             <Field name="a" label="A" />
@@ -17,7 +25,8 @@ describe("Form submission", () => {
         )}
       </App>,
     )
-    fireEvent.click(screen.getByText("submit"))
+    userEvent.click(screen.getByText("submit"))
+    await flushPromises()
     expect(handleSubmit).toHaveBeenLastCalledWith({ value: { a: "x", b: "y" } })
   })
   test("validation failure block submit", async () => {
@@ -38,7 +47,7 @@ describe("Form submission", () => {
         )}
       </App>,
     )
-    fireEvent.click(screen.getByText("submit"))
+    userEvent.click(screen.getByText("submit"))
     expect(await screen.findByText("f is required")).toBeInTheDocument()
     expect(handleSubmit).not.toHaveBeenCalled()
   })
