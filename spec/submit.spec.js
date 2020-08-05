@@ -1,10 +1,8 @@
-import { render, screen } from "@testing-library/react"
+import { render, screen, waitFor } from "@testing-library/react"
 import React from "react"
 import Field from "../src/Field"
 import App from "./App"
 import userEvent from "@testing-library/user-event"
-
-const flushPromises = () => new Promise(window.setImmediate)
 
 describe("Form submission", () => {
   test("onSubmti get value", async () => {
@@ -26,8 +24,11 @@ describe("Form submission", () => {
       </App>,
     )
     userEvent.click(screen.getByText("submit"))
-    await flushPromises()
-    expect(handleSubmit).toHaveBeenLastCalledWith({ value: { a: "x", b: "y" } })
+    await waitFor(() => {
+      expect(handleSubmit).toHaveBeenLastCalledWith({
+        value: { a: "x", b: "y" },
+      })
+    })
   })
   test("validation failure block submit", async () => {
     const handleSubmit = jest.fn()

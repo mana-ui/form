@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react"
+import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import React from "react"
 import { Field } from "../src/"
@@ -21,14 +21,22 @@ describe("validator", () => {
       </App>,
     )
     const input = screen.getByLabelText(/F/)
-    await userEvent.type(input, "{backspace}")
-    expect(screen.getByText("F is required")).toBeInTheDocument()
-    await userEvent.type(input, "abc")
-    expect(screen.queryByText("F is required")).not.toBeInTheDocument()
-    await userEvent.type(input, "def")
-    expect(screen.getByText("F exceeds max length")).toBeInTheDocument()
-    await userEvent.type(input, "{backspace}")
-    expect(screen.queryByText("F exceeds max length")).not.toBeInTheDocument()
+    userEvent.type(input, "{backspace}")
+    await waitFor(() => {
+      expect(screen.getByText("F is required")).toBeInTheDocument()
+    })
+    userEvent.type(input, "abc")
+    await waitFor(() => {
+      expect(screen.queryByText("F is required")).not.toBeInTheDocument()
+    })
+    userEvent.type(input, "def")
+    await waitFor(() => {
+      expect(screen.getByText("F exceeds max length")).toBeInTheDocument()
+    })
+    userEvent.type(input, "{backspace}")
+    await waitFor(() => {
+      expect(screen.queryByText("F exceeds max length")).not.toBeInTheDocument()
+    })
   })
   test("validators from higher component", async () => {
     render(
@@ -42,13 +50,21 @@ describe("validator", () => {
       </App>,
     )
     const input = screen.getByLabelText(/F/)
-    await userEvent.type(input, "{backspace}")
-    expect(screen.getByText("F is required")).toBeInTheDocument()
-    await userEvent.type(input, "abc")
-    expect(screen.queryByText("F is required")).not.toBeInTheDocument()
-    await userEvent.type(input, "def")
-    expect(screen.getByText("F exceeds max length")).toBeInTheDocument()
-    await userEvent.type(input, "{backspace}")
-    expect(screen.queryByText("F exceeds max length")).not.toBeInTheDocument()
+    userEvent.type(input, "{backspace}")
+    await waitFor(() => {
+      expect(screen.getByText("F is required")).toBeInTheDocument()
+    })
+    userEvent.type(input, "abc")
+    await waitFor(() => {
+      expect(screen.queryByText("F is required")).not.toBeInTheDocument()
+    })
+    userEvent.type(input, "def")
+    await waitFor(() => {
+      expect(screen.getByText("F exceeds max length")).toBeInTheDocument()
+    })
+    userEvent.type(input, "{backspace}")
+    await waitFor(() => {
+      expect(screen.queryByText("F exceeds max length")).not.toBeInTheDocument()
+    })
   })
 })

@@ -1,11 +1,3 @@
-import { UPDATE, VALIDATE, SUBMIT } from "./events"
-
-const filters = {
-  [UPDATE]: (path) => ({ fullPath }) => fullPath === path,
-  [VALIDATE]: (path) => ({ fullPath }) => fullPath === path,
-  [SUBMIT]: (path) => ({ fullPath }) => fullPath === path,
-}
-
 class Observer {
   constructor() {
     this.register = new Map()
@@ -13,7 +5,9 @@ class Observer {
   emit(event, path) {
     const items = this.register.get(event) ?? []
     return Promise.all(
-      items.filter(filters[event](path)).map(({ callback }) => callback()),
+      items
+        .filter(({ fullPath }) => fullPath === path)
+        .map(({ callback }) => callback()),
     )
   }
   listen(event, fullPath, callback) {

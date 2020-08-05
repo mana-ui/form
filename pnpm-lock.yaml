@@ -3,7 +3,7 @@ devDependencies:
   '@babel/preset-react': 7.10.4
   '@testing-library/jest-dom': 5.11.0
   '@testing-library/react': 10.4.5_react-dom@16.13.1
-  '@testing-library/user-event': 12.0.11
+  '@testing-library/user-event': 12.1.0
   core-js: 3.6.5
   eslint: 7.4.0
   eslint-plugin-jest: 23.18.0_eslint@7.4.0
@@ -1314,7 +1314,7 @@ packages:
       react-dom: '*'
     resolution:
       integrity: sha512-M5A0W4VphBiEm4vgnq7vHC+/e4Bp/3iIOAWap1FtIiA+Zom6BtXpY3RSTOqc8bZsCcu9gFBZ/lxaiMW6uJddWg==
-  /@testing-library/user-event/12.0.11:
+  /@testing-library/user-event/12.1.0:
     dependencies:
       '@babel/runtime': 7.10.4
     dev: true
@@ -1322,9 +1322,9 @@ packages:
       node: '>=10'
       npm: '>=6'
     peerDependencies:
-      '@testing-library/dom': '>=7.16.0'
+      '@testing-library/dom': '>=7.21.4'
     resolution:
-      integrity: sha512-r7QNfktLE2n8IODEl32orup/HNOMueJpoXRDeTMlvWR4nZIHJwx59+8SkLf6nqV4Ot5Xo6qNeaWrvC1KO4eOng==
+      integrity: sha512-aH/XuNFpPD6dA+fh754EGqKeAzpH66HpLJYkv9vOAih2yGmTM8JiZ8uisQDGWRPkc6sxE2zCqDwLR4ZskhRCxw==
   /@types/aria-query/4.2.0:
     dev: true
     resolution:
@@ -5858,7 +5858,7 @@ specifiers:
   '@babel/preset-react': ^7.10.4
   '@testing-library/jest-dom': ^5.11.0
   '@testing-library/react': ^10.4.5
-  '@testing-library/user-event': ^12.0.11
+  '@testing-library/user-event': ^12.1.0
   core-js: ^3.6.5
   eslint: ^7.4.0
   eslint-plugin-jest: ^23.18.0

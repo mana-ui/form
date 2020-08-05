@@ -26,28 +26,31 @@ export default function useField(name, validators, rules) {
   const value = get(fullPath)
   const [error, setError] = useState(null)
   const selfValidate = () => {
-    let error = null
-    for (const [rule, param] of Object.entries(rules)) {
-      const message = v[rule]?.(value, param)
-      if (message) {
-        error = message
-        break
-      }
-    }
-
-    setError(error)
-    if (error) throw error
+    return Promise.all(
+      Object.entries(rules).map(async ([rule, param]) => {
+        const error = (await v[rule]?.(value, param)) || null
+        if (error) throw error
+      }),
+    ).then(
+      () => setError(null),
+      (error) => {
+        setError(error)
+        return Promise.reject(error)
+      },
+    )
   }
   const validate = async () => {
     try {
-      selfValidate()
+      await selfValidate()
       return observer.emit(VALIDATE, ctxPath)
       // eslint-disable-next-line no-empty
     } catch (e) {}
   }
   const mounted = useRef(false)
   useEffect(() => {
-    if (mounted.current) validate()
+    if (mounted.current) {
+      validate()
+    }
     mounted.current = true
   })
   return {
