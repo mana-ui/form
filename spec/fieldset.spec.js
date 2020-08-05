@@ -72,26 +72,36 @@ describe("FieldSet", () => {
   })
   test("fieldset validator", async () => {
     render(
-      <App initValue={{ a: "", b: "" }}>
-        <FieldSet
-          validators={{
-            same: ({ a, b }) => a !== b && "A and B should be same",
-          }}
-          same
-        >
-          {({ error }) => (
-            <>
-              <Field name="a" label="A" />
-              <Field name="b" label="B" />
-              {error}
-            </>
-          )}
-        </FieldSet>
+      <App initValue={{ a: "a", b: "b" }}>
+        {({ submit }) => (
+          <>
+            {" "}
+            <FieldSet
+              validators={{
+                same: ({ a, b }) => a !== b && "A and B should be same",
+              }}
+              same
+            >
+              {({ error }) => (
+                <>
+                  <Field name="a" label="A" />
+                  <Field name="b" label="B" />
+                  {error}
+                </>
+              )}
+            </FieldSet>
+            <button onClick={submit}>submit</button>
+          </>
+        )}
       </App>,
     )
+    userEvent.click(screen.getByText("submit"))
+    await waitFor(() => {
+      expect(screen.getByText("A and B should be same")).toBeInTheDocument()
+    })
     const inputA = screen.getByLabelText("A")
-    userEvent.type(inputA, "hello")
     const inputB = screen.getByLabelText("B")
+    userEvent.type(inputA, "hello")
     userEvent.type(inputB, "world")
     await waitFor(() => {
       expect(screen.getByText("A and B should be same")).toBeInTheDocument()

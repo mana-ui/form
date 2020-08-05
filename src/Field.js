@@ -26,7 +26,7 @@ const Field = (props) => {
   } = props
   const { context, value, error, ctxPath } = useField(name, validators, rules)
   const r = render || context.fieldRender || defaultRender
-  const c = control || context.ctxControl || defaultControl
+  const c = control || context.control || defaultControl
   const formProps = {}
   if (typeof c === "function") {
     formProps.get = () => value

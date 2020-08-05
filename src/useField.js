@@ -18,7 +18,9 @@ export default function useField(name, validators, rules) {
     }),
   )
   const handleSubmit = async () => {
-    await observer.emit(SUBMIT, fullPath)
+    if (fullPath !== ctxPath) {
+      await observer.emit(SUBMIT, fullPath)
+    }
     return selfValidate()
   }
   useEffect(() => observer.listen(SUBMIT, ctxPath, handleSubmit))
