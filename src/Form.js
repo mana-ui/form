@@ -1,4 +1,6 @@
-import React, { createContext, useRef, useMemo, useEffect } from "react"
+import React, { createContext, useRef, useMemo } from "react"
+import Observer from "./Observer"
+import { UPDATE, SUBMIT } from "./events"
 
 export const Context = createContext()
 
@@ -11,20 +13,19 @@ const Form = ({
   control,
   onSubmit,
 }) => {
+  const observerRef = useRef(new Observer())
   const vRef = useRef(value)
-  const reg = useRef([])
-  const pending = useRef(new Set())
   vRef.current = value
 
   const get = (fullPath) => {
     let v,
       s = value
-    const pathes = fullPath.split(".")
+    const pathes = fullPath.split(".").filter(Boolean)
     for (const k of pathes) {
       v = s[k]
       s = v
     }
-    return v
+    return v ?? s
   }
 
   const set = (v, fullPath) => {
@@ -36,47 +37,27 @@ const Form = ({
     }
     s[name] = v
     setValue(value)
-    pending.current.add(fullPath)
+    observerRef.current.emit(UPDATE, fullPath)
   }
-
   const context = useMemo(
     () => ({
+      observer: observerRef.current,
+      unsubSubmit: () => {},
       get,
       set,
       fieldRender,
-      listen: (fullPath, instance) => {
-        const item = { fullPath, instance }
-        reg.current = [...reg.current, item]
-        return () => {
-          reg.current = reg.current.filter((i) => i !== item)
-        }
-      },
       validators,
       control,
       path: "",
     }),
     [],
   )
-  useEffect(() => {
-    for (const { fullPath, instance } of reg.current) {
-      if (pending.current.has(fullPath)) {
-        pending.current.delete(fullPath)
-        const v = get(fullPath)
-        instance.current.update(v)
-      }
-    }
-  })
-  const submit = () => {
-    let allValid = true
-    for (const { instance } of reg.current) {
-      const error = instance.current.validate()
-      if (error) {
-        allValid = false
-      }
-    }
-    if (allValid) {
+  const submit = async () => {
+    try {
+      await observerRef.current.emit(SUBMIT, "")
       onSubmit({ value })
-    }
+      // eslint-disable-next-line no-empty
+    } catch (e) {}
   }
   return (
     <Context.Provider value={context}>{children({ submit })}</Context.Provider>

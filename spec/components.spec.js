@@ -1,5 +1,5 @@
 import React from "react"
-import { render, screen } from "@testing-library/react"
+import { render, screen, waitFor } from "@testing-library/react"
 import App from "./App"
 import { Field } from "../src"
 import userEvent from "@testing-library/user-event"
@@ -43,17 +43,23 @@ describe("Form control component", () => {
       </App>,
     )
     const inputA = screen.getByLabelText("A")
-    await userEvent.type(inputA, "abc")
-    expect(inputA).toHaveValue("abc")
+    userEvent.type(inputA, "abc")
+    await waitFor(() => {
+      expect(inputA).toHaveValue("abc")
+    })
 
     const selectB = screen.getByLabelText("B")
     expect(selectB).toHaveClass("custom-b")
-    await userEvent.selectOptions(selectB, screen.getByText("B2"))
-    expect(selectB).toHaveValue("b2")
+    userEvent.selectOptions(selectB, screen.getByText("B2"))
+    await waitFor(() => {
+      expect(selectB).toHaveValue("b2")
+    })
 
     const checkC = screen.getByLabelText("C")
     expect(checkC).toHaveAttribute("id", "custom-c")
-    await userEvent.click(checkC)
-    expect(checkC).toBeChecked()
+    userEvent.click(checkC)
+    await waitFor(() => {
+      expect(checkC).toBeChecked()
+    })
   })
 })

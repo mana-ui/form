@@ -1,12 +1,12 @@
-import React, { useContext } from "react"
+import React from "react"
 import { Context } from "./Form"
-import { join } from "path"
+import useField from "./useField"
 
-const FieldSet = ({ children, name }) => {
-  const ctx = useContext(Context)
+const FieldSet = ({ children, name = "", validators, ...rules }) => {
+  const { context, error } = useField(name, validators, rules)
   return (
-    <Context.Provider value={{ ...ctx, path: join(ctx.path, name) }}>
-      {children}
+    <Context.Provider value={context}>
+      {typeof children === "function" ? children({ error }) : children}
     </Context.Provider>
   )
 }

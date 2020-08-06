@@ -1,5 +1,9 @@
 import React from "react"
-import { render } from "@testing-library/react"
+import {
+  render,
+  waitFor,
+  waitForElementToBeRemoved,
+} from "@testing-library/react"
 import App from "./App"
 import { FieldSet, Field } from "../src"
 import { screen } from "@testing-library/react"
@@ -17,8 +21,10 @@ describe("FieldSet", () => {
     )
     const inputB = screen.getByLabelText("B")
     expect(inputB).toHaveValue("b")
-    await userEvent.type(inputB, "{backspace}hello")
-    expect(inputB).toHaveValue("hello")
+    userEvent.type(inputB, "{backspace}hello")
+    await waitFor(() => {
+      expect(inputB).toHaveValue("hello")
+    })
     expect(onChange).toHaveBeenLastCalledWith({ a: { b: "hello" } })
   })
   test("id", async () => {
@@ -47,8 +53,10 @@ describe("FieldSet", () => {
     const inputAB = screen.getByLabelText("AB")
     expect(inputAB).toHaveAttribute("id", "a.b")
     expect(inputAB).toHaveValue("b")
-    await userEvent.type(inputAB, "{backspace}hello")
-    expect(inputAB).toHaveValue("hello")
+    userEvent.type(inputAB, "{backspace}hello")
+    await waitFor(() => {
+      expect(inputAB).toHaveValue("hello")
+    })
     expect(onChange).toHaveBeenLastCalledWith({
       a: { b: "hello" },
       b: { b: "b" },
@@ -57,11 +65,54 @@ describe("FieldSet", () => {
     const inputBB = screen.getByLabelText("BB")
     expect(inputBB).toHaveAttribute("id", "b.b")
     expect(inputBB).toHaveValue("b")
-    await userEvent.type(inputBB, "{backspace}world")
-    expect(inputBB).toHaveValue("world")
+    userEvent.type(inputBB, "{backspace}world")
+    await waitFor(() => {
+      expect(inputBB).toHaveValue("world")
+    })
     expect(onChange).toHaveBeenLastCalledWith({
       a: { b: "hello" },
       b: { b: "world" },
+    })
+  })
+  test("fieldset validator", async () => {
+    render(
+      <App initValue={{ a: "a", b: "b" }}>
+        {({ submit }) => (
+          <>
+            {" "}
+            <FieldSet
+              validators={{
+                same: ({ a, b }) => a !== b && "A and B should be same",
+              }}
+              same
+            >
+              {({ error }) => (
+                <>
+                  <Field name="a" label="A" />
+                  <Field name="b" label="B" />
+                  {error}
+                </>
+              )}
+            </FieldSet>
+            <button onClick={submit}>submit</button>
+          </>
+        )}
+      </App>,
+    )
+    userEvent.click(screen.getByText("submit"))
+    await waitFor(() => {
+      expect(screen.getByText("A and B should be same")).toBeInTheDocument()
+    })
+    const inputA = screen.getByLabelText("A")
+    const inputB = screen.getByLabelText("B")
+    userEvent.type(inputB, "{backspace}a")
+    await waitForElementToBeRemoved(() =>
+      screen.queryByText("A and B should be same"),
+    )
+    userEvent.type(inputA, "hello")
+    userEvent.type(inputB, "world")
+    await waitFor(() => {
+      expect(screen.getByText("A and B should be same")).toBeInTheDocument()
     })
   })
 })
