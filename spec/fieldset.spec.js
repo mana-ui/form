@@ -1,5 +1,9 @@
 import React from "react"
-import { render, waitFor } from "@testing-library/react"
+import {
+  render,
+  waitFor,
+  waitForElementToBeRemoved,
+} from "@testing-library/react"
 import App from "./App"
 import { FieldSet, Field } from "../src"
 import { screen } from "@testing-library/react"
@@ -101,6 +105,10 @@ describe("FieldSet", () => {
     })
     const inputA = screen.getByLabelText("A")
     const inputB = screen.getByLabelText("B")
+    userEvent.type(inputB, "{backspace}a")
+    await waitForElementToBeRemoved(() =>
+      screen.queryByText("A and B should be same"),
+    )
     userEvent.type(inputA, "hello")
     userEvent.type(inputB, "world")
     await waitFor(() => {

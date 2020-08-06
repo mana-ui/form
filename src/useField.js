@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect, useRef } from "react"
+import { useContext, useState, useEffect } from "react"
 import { Context } from "./Form"
 import { join } from "./path"
 import { UPDATE, SUBMIT, VALIDATE } from "./events"
@@ -15,6 +15,7 @@ export default function useField(name, validators, rules) {
   useEffect(() =>
     observer.listen(UPDATE, fullPath, () => {
       forceUpdate([])
+      validate()
     }),
   )
   const handleSubmit = async () => {
@@ -28,13 +29,16 @@ export default function useField(name, validators, rules) {
   const value = get(fullPath)
   const [error, setError] = useState(null)
   const selfValidate = () => {
+    const newValue = get(fullPath)
     return Promise.all(
       Object.entries(rules).map(async ([rule, param]) => {
-        const error = (await v[rule]?.(value, param)) || null
+        const error = (await v[rule]?.(newValue, param)) || null
         if (error) throw error
       }),
     ).then(
-      () => setError(null),
+      () => {
+        setError(null)
+      },
       (error) => {
         setError(error)
         return Promise.reject(error)
@@ -44,17 +48,12 @@ export default function useField(name, validators, rules) {
   const validate = async () => {
     try {
       await selfValidate()
-      return observer.emit(VALIDATE, ctxPath)
+      if (fullPath !== ctxPath) {
+        return observer.emit(VALIDATE, ctxPath)
+      }
       // eslint-disable-next-line no-empty
     } catch (e) {}
   }
-  const mounted = useRef(false)
-  useEffect(() => {
-    if (mounted.current) {
-      validate()
-    }
-    mounted.current = true
-  })
   return {
     error,
     context: {
