@@ -2,13 +2,45 @@
 
 # Features
 
-Mana form handles three aspects of forms: data management, validation and submit.
+Mana form handles four aspects of forms: data management, layout, validation and submit.
 
 - data management: get values show in each fields with correct controls and update values correctly
+- layout: how each field is rendered: include control, label and error message
 - validation: validate value restrictions & show errors
 - submit: complete form filling
 
 ## Data Management
+
+1. When using mana form, an init value should be provided:
+
+```javascript
+// init value
+<Form init={{ a: "a", b: "b" }}>...</Form>
+```
+
+2. You may also init by a store returned by useStore hook, it's useful when you want to get/set data outside of the form.
+
+```javascript
+import {useStore} from '@mana-ui/form'
+
+// init store
+const store = useStore({a: 'a', b: 'b'})
+<Form init={store}>...</Form>
+
+// get/set value from store:
+store.get() // {a: 'a', b: 'b'}
+store.set('updated b', 'b') // set property b a new value
+store.get('b') // returns 'update b'
+```
+
+3. subscribe to value changes:
+
+```javascript
+const store = useStore({ a: "a" })
+store.listen((v) => console.log(v)) // log value when data changes
+```
+
+## Layout
 
 1. Mana form provides default view components, and inject `value` and `onChange`:
 
