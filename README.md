@@ -2,13 +2,13 @@
 
 # Features
 
-Mana form handles four aspects of forms: view & update, validation and submit.
+Mana form handles three aspects of forms: data management, validation and submit.
 
-- view & update: get values show in each fields with correct controls and update values correctly
+- data management: get values show in each fields with correct controls and update values correctly
 - validation: validate value restrictions & show errors
 - submit: complete form filling
 
-## View & Update
+## Data Management
 
 1. Mana form provides default view components, and inject `value` and `onChange`:
 
@@ -58,7 +58,7 @@ If your component don't receive `value` or `onChange` prop, you can use render p
 
 3. define form layout
 
-Usually fields of a form have the same layout, you can define this layout by fieldRender prop of Form.
+Usually fields of a form have the same layout, you can define this layout by `fieldRender` of Form.
 
 ```javascript
 <Form
@@ -77,6 +77,7 @@ Usually fields of a form have the same layout, you can define this layout by fie
   }}
 </Form>
 
+// reander as:
 <div>
   <div class="field" >
     <label for="a">A</label>
@@ -111,6 +112,7 @@ const customRender = (className) => ({ Control, labelElem, id }) => (
   )}
 </Form>
 
+// render as
 <div>
   <div class="field-render" >
     <label for="a" />
@@ -129,6 +131,9 @@ You may define validators by `validators` prop, and use validators by props othe
 
 ```javascript
 <Form
+  validators={{
+    required: (v) => v === "" && "F is required",
+  }}
   fieldRender={({ labelElem, Control, error }) => (
     <div>
       <label>{labelElem}</label>
@@ -144,23 +149,22 @@ You may define validators by `validators` prop, and use validators by props othe
       name="f"
       label="F"
       validators={{
-        required: (v) => v === "" && "F is required",
         maxLength: (v, max) => v.length > max && "F exceeds max length",
       }}
-      required
-      maxLength={5}
+      required // required is not a Field used prop and it enables required rule defined in Form validators
+      maxLength={5} // as the same, maxLength enables the rule of Field validator with the param 5
     />
   )}
 </Form>
 ```
 
-A validator is a function return a message when a rule is not fullfilled. A validator is applied when a prop same as the key and it is called with the prop value. Appled validators on a Field will be called by chronological order defined on props.
+A validator is a function returns a message when a rule is not fullfilled. A validator is enabled when a prop same as the key. The validator function will be invoked with the field value as the first argument and the prop value as the second argument. Enabled validators on a Field will be called by chronological order defined on props.
 
 You can decide how error is shown by fieldRender.
 
 ## Submit
 
-Form provide sumbit callback by children render prop, when it's called, all applyed validators get invoked, if anyone fails, onSubmit is skipped, otherwise onSubmit is called with form data.
+Form provides sumbit callback by children render prop, when it's called, all enabled validators get invoked, if anyone fails, onSubmit is skipped, otherwise onSubmit is called with form data.
 
 ```javascript
 <Form value={{ a: "x", b: "y" }} onSubmit={({value} => {})}>
@@ -171,5 +175,37 @@ Form provide sumbit callback by children render prop, when it's called, all appl
       <button onClick={submit}>submit</button>
     </>
   )}
+</Form>
+```
+
+## FieldSet
+
+FieldSet is used when your form have multi-layer data structure or you need validation of multi-fields.
+
+```javascript
+// multi-layer form
+<Form value={{ a: { b: "b", c: "c" } }}>
+  <FieldSet name="a">
+    <Field name="b" label="B" />
+    <Field name="c" label="C" />
+  </FieldSet>
+</Form>
+
+// multi-fields validation
+<Form value={{ a: "a", b: "b" }}>
+  <FieldSet
+    validators={{
+      same: ({ a, b }) => a !== b && "A and B should be same",
+    }}
+    same
+  >
+    {({ error }) => (
+      <>
+        <Field name="a" label="A" />
+        <Field name="b" label="B" />
+        {error}
+      </>
+    )}
+  </FieldSet>
 </Form>
 ```
