@@ -13,10 +13,14 @@ export default function useField(name, validators, rules) {
   const fullPath = join(ctxPath, name)
   const forceUpdate = useState([])[1]
   useEffect(() =>
-    observer.listen(UPDATE, fullPath, () => {
-      forceUpdate([])
-      validate()
-    }),
+    observer.listen(
+      UPDATE,
+      () => {
+        forceUpdate([])
+        validate()
+      },
+      fullPath,
+    ),
   )
   const handleSubmit = async () => {
     if (fullPath !== ctxPath) {
@@ -24,8 +28,8 @@ export default function useField(name, validators, rules) {
     }
     return selfValidate()
   }
-  useEffect(() => observer.listen(SUBMIT, ctxPath, handleSubmit))
-  useEffect(() => observer.listen(VALIDATE, fullPath, validate))
+  useEffect(() => observer.listen(SUBMIT, handleSubmit, ctxPath))
+  useEffect(() => observer.listen(VALIDATE, validate, fullPath))
   const value = get(fullPath)
   const [error, setError] = useState(null)
   const selfValidate = () => {

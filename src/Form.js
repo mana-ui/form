@@ -1,61 +1,37 @@
 import React, { createContext, useRef, useMemo } from "react"
 import Observer from "./Observer"
-import { UPDATE, SUBMIT } from "./events"
+import { SUBMIT } from "./events"
+import useStore from "./useStore"
 
 export const Context = createContext()
 
 const Form = ({
+  init,
   children,
-  value,
-  setValue,
   fieldRender,
   validators,
   control,
   onSubmit,
 }) => {
   const observerRef = useRef(new Observer())
-  const vRef = useRef(value)
-  vRef.current = value
+  const store = useStore(init, observerRef.current)
 
-  const get = (fullPath) => {
-    let v,
-      s = value
-    const pathes = fullPath.split(".").filter(Boolean)
-    for (const k of pathes) {
-      v = s[k]
-      s = v
-    }
-    return v ?? s
-  }
-
-  const set = (v, fullPath) => {
-    const pathes = fullPath.split(".")
-    const name = pathes.pop()
-    let s = value
-    for (const k of pathes) {
-      s = s[k]
-    }
-    s[name] = v
-    setValue(value)
-    observerRef.current.emit(UPDATE, fullPath)
-  }
   const context = useMemo(
     () => ({
       observer: observerRef.current,
-      unsubSubmit: () => {},
-      get,
-      set,
+      get: store.get,
+      set: store.set,
       fieldRender,
       validators,
       control,
       path: "",
     }),
-    [],
+    [control, fieldRender, store, validators],
   )
   const submit = async () => {
     try {
       await observerRef.current.emit(SUBMIT, "")
-      onSubmit({ value })
+      onSubmit({ value: store.get() })
       // eslint-disable-next-line no-empty
     } catch (e) {}
   }
