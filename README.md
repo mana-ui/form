@@ -53,17 +53,17 @@ value is fetched by name or path, onChange is same as plain `input` onChange pro
 
 2. customize components:
 
-You can override control component by provide control prop a react element, Field will pass `value` and `onChange` props to this react element.
+You can override control component by providing control prop a react element, Field will pass `value` and `onChange` props to this react element.
 
 ```javascript
 <Field
   name="a"
   label="A"
   control={
-    <Select className="custom-a">
+    <select className="custom-a">
       <option value="a">a</option>
       <option value="b">b</option>
-    </Select>
+    </select>
   }
 />
 ```
