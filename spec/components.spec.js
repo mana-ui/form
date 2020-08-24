@@ -16,7 +16,16 @@ describe("Form control component", () => {
   })
   test("customize control component", async () => {
     render(
-      <App initValue={{ a: "", b: "b1", c: false }}>
+      <App
+        initValue={{ a: "", b: "b1", c: false }}
+        fieldRender={({ Control, labelElem, error, id }) => (
+          <div>
+            <label htmlFor={id}>{labelElem}</label>
+            <Control id={id} />
+            {error}
+          </div>
+        )}
+      >
         <Field name="a" label="A" />
         <Field
           name="b"
@@ -33,7 +42,7 @@ describe("Form control component", () => {
           label="C"
           control={({ get, set }) => (
             <input
-              id="custom-c"
+              className="custom-c"
               type="checkbox"
               checked={get()}
               onChange={({ target: { checked } }) => set(checked)}
@@ -56,7 +65,8 @@ describe("Form control component", () => {
     })
 
     const checkC = screen.getByLabelText("C")
-    expect(checkC).toHaveAttribute("id", "custom-c")
+    expect(checkC).toHaveClass("custom-c")
+    expect(checkC).toHaveAttribute("id", "c")
     userEvent.click(checkC)
     await waitFor(() => {
       expect(checkC).toBeChecked()

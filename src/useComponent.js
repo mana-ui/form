@@ -4,7 +4,8 @@ const useComponent = (children, formProps) => {
   const renderRef = useRef()
   renderRef.current = function Control(props) {
     if (typeof children === "function") {
-      return children({ ...formProps, ...props })
+      const control = children(formProps)
+      return <control.type {...control.props} {...props} />
     }
     return <children.type {...formProps} {...children.props} {...props} />
   }
