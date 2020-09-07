@@ -72,4 +72,13 @@ describe("Form control component", () => {
       expect(checkC).toBeChecked()
     })
   })
+  test("disabled should received by control", async () => {
+    render(
+      <App>
+        <Field name="f" label="F" disabled />
+      </App>,
+    )
+    const control = screen.getByLabelText("F")
+    expect(control).toBeDisabled()
+  })
 })

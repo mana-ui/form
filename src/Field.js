@@ -22,12 +22,13 @@ const Field = (props) => {
     label: labelElem,
     render,
     validators = {},
+    disabled,
     ...rules
   } = props
   const { context, value, error, ctxPath } = useField(name, validators, rules)
   const r = render || context.fieldRender || defaultRender
   const c = control || context.control || defaultControl
-  const formProps = {}
+  const formProps = { disabled }
   if (typeof c === "function") {
     formProps.get = () => value
     formProps.set = (v, n = name) => context.set(v, join(ctxPath, n))
