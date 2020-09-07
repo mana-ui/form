@@ -67,4 +67,21 @@ describe("validator", () => {
       expect(screen.queryByText("F exceeds max length")).not.toBeInTheDocument()
     })
   })
+  test("disabled field validators should be skipped", async () => {
+    const handleSubmit = jest.fn()
+    render(
+      <App initValue={{ f: "" }} onSubmit={handleSubmit}>
+        {({ submit }) => (
+          <>
+            <Field name="f" label="F" disabled required />
+            <button onClick={submit}>submit</button>
+          </>
+        )}
+      </App>,
+    )
+    userEvent.click(screen.getByText("submit"))
+    await waitFor(() => {
+      expect(handleSubmit).toHaveBeenCalled()
+    })
+  })
 })

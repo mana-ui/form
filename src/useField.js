@@ -3,7 +3,13 @@ import { Context } from "./Form"
 import { join } from "./path"
 import { UPDATE, SUBMIT, VALIDATE } from "./events"
 
-export default function useField(name, validators, rules) {
+export default function useField(
+  name,
+  validators,
+  rules,
+  options = { disabled: false },
+) {
+  const { disabled } = options
   const context = useContext(Context)
   const { observer, get, path: ctxPath, validators: ctxValidators } = context
   const v = {
@@ -33,6 +39,9 @@ export default function useField(name, validators, rules) {
   const value = get(fullPath)
   const [error, setError] = useState(null)
   const selfValidate = () => {
+    if (disabled) {
+      return
+    }
     const newValue = get(fullPath)
     return Promise.all(
       Object.entries(rules).map(async ([rule, param]) => {
