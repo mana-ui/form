@@ -13,7 +13,7 @@ describe("validator", () => {
           name="f"
           label="F"
           validators={{
-            required: (v) => v === "" && "F is required",
+            required: (v) => v === "" && <span>F is required</span>,
             maxLength: (v, max) => v.length > max && "F exceeds max length",
           }}
           required

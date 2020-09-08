@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect } from "react"
+import { useContext, useState, useEffect, useRef } from "react"
 import { Context } from "./Form"
 import { join } from "./path"
 import { UPDATE, SUBMIT, VALIDATE } from "./events"
@@ -17,20 +17,15 @@ export default function useField(
     ...validators,
   }
   const fullPath = join(ctxPath, name)
-  const [updated, forceUpdate] = useState(0)
+  const [updateId, rerender] = useState(0)
   useEffect(() => {
     return observer.listen(
       UPDATE,
       () => {
-        forceUpdate((x) => x + 1)
+        rerender((x) => x + 1)
       },
       fullPath,
     )
-  })
-  useEffect(() => {
-    if (updated) {
-      validate()
-    }
   })
   const handleSubmit = async () => {
     if (fullPath !== ctxPath) {
@@ -39,7 +34,9 @@ export default function useField(
     return selfValidate()
   }
   useEffect(() => observer.listen(SUBMIT, handleSubmit, ctxPath))
-  useEffect(() => observer.listen(VALIDATE, validate, fullPath))
+
+  const validate = useRef()
+  useEffect(() => observer.listen(VALIDATE, () => validate.current(), fullPath))
   const value = get(fullPath)
   const [error, setError] = useState(null)
   const selfValidate = () => {
@@ -62,7 +59,7 @@ export default function useField(
       },
     )
   }
-  const validate = async () => {
+  validate.current = async () => {
     try {
       await selfValidate()
       if (fullPath !== ctxPath) {
@@ -71,6 +68,11 @@ export default function useField(
       // eslint-disable-next-line no-empty
     } catch (e) {}
   }
+  useEffect(() => {
+    if (updateId) {
+      validate.current()
+    }
+  }, [updateId])
   return {
     error,
     context: {
