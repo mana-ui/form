@@ -1,8 +1,9 @@
-import { render, screen, waitFor } from "@testing-library/react"
+import { render, screen, waitFor, fireEvent } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import React from "react"
+import React, { useState } from "react"
 import { Field } from "../src/"
 import App from "./App"
+import { useStore } from "../src/index"
 
 describe("validator", () => {
   test("inline validator", async () => {
@@ -69,16 +70,40 @@ describe("validator", () => {
   })
   test("disabled field validators should be skipped", async () => {
     const handleSubmit = jest.fn()
-    render(
-      <App initValue={{ f: "" }} onSubmit={handleSubmit}>
-        {({ submit }) => (
-          <>
-            <Field name="f" label="F" disabled required />
-            <button onClick={submit}>submit</button>
-          </>
-        )}
-      </App>,
-    )
+    const Container = () => {
+      const [disabled, setDisabled] = useState(false)
+      const store = useStore({ f: "" })
+      return (
+        <App
+          initValue={store}
+          onSubmit={handleSubmit}
+          validators={{
+            required: (v) => v === "" && "F is required",
+          }}
+        >
+          {({ submit }) => (
+            <>
+              <Field name="f" label="F" disabled={disabled} required />
+              <button
+                onClick={() => {
+                  setDisabled(true)
+                  store.set("", "f")
+                }}
+              >
+                toggle
+              </button>
+              <button onClick={submit}>submit</button>
+            </>
+          )}
+        </App>
+      )
+    }
+    render(<Container />)
+    fireEvent.click(screen.getByText("toggle"))
+    await waitFor(() => {
+      expect(screen.getByLabelText("F")).toBeDisabled()
+    })
+    expect(screen.queryByText("F is required")).not.toBeInTheDocument()
     userEvent.click(screen.getByText("submit"))
     await waitFor(() => {
       expect(handleSubmit).toHaveBeenCalled()

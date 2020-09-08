@@ -17,17 +17,21 @@ export default function useField(
     ...validators,
   }
   const fullPath = join(ctxPath, name)
-  const forceUpdate = useState([])[1]
-  useEffect(() =>
-    observer.listen(
+  const [updated, forceUpdate] = useState(0)
+  useEffect(() => {
+    return observer.listen(
       UPDATE,
       () => {
-        forceUpdate([])
-        validate()
+        forceUpdate((x) => x + 1)
       },
       fullPath,
-    ),
-  )
+    )
+  })
+  useEffect(() => {
+    if (updated) {
+      validate()
+    }
+  })
   const handleSubmit = async () => {
     if (fullPath !== ctxPath) {
       await observer.emit(SUBMIT, fullPath)
