@@ -79,7 +79,6 @@ describe("FieldSet", () => {
       <App initValue={{ a: "a", b: "b" }}>
         {({ submit }) => (
           <>
-            {" "}
             <FieldSet
               validators={{
                 same: ({ a, b }) => a !== b && "A and B should be same",

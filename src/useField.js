@@ -1,7 +1,7 @@
 import { useContext, useState, useEffect, useRef } from "react"
 import { Context } from "./Form"
 import { join } from "./path"
-import { UPDATE, SUBMIT, VALIDATE } from "./events"
+import { UPDATE, SUBMIT_VALIDATE, VALIDATE } from "./events"
 
 export default function useField(
   name,
@@ -29,11 +29,11 @@ export default function useField(
   })
   const handleSubmit = async () => {
     if (fullPath !== ctxPath) {
-      await observer.emit(SUBMIT, fullPath)
+      await observer.emit(SUBMIT_VALIDATE, fullPath)
     }
     return selfValidate()
   }
-  useEffect(() => observer.listen(SUBMIT, handleSubmit, ctxPath))
+  useEffect(() => observer.listen(SUBMIT_VALIDATE, handleSubmit, ctxPath))
 
   const validate = useRef()
   useEffect(() => observer.listen(VALIDATE, () => validate.current(), fullPath))

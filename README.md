@@ -11,34 +11,39 @@ Mana form handles four aspects of forms: data management, layout, validation and
 
 ## Data Management
 
-1. When using mana form, an init value should be provided:
+1. When using mana form, an init value should be provided to useForm hook, which returns a form instance, then pass the instance to Form component:
 
 ```javascript
 // init value
-<Form init={{ a: "a", b: "b" }}>...</Form>
+const form = useForm({ a: "a", b: "b" })
+<Form init={form}>...</Form>
 ```
 
-2. You may also init by a store returned by useStore hook, it's useful when you want to get/set data outside of the form.
+2. The form instance returned by useForm hook is useful when you want to get/set data outside of the form.
 
 ```javascript
-import {useStore} from '@mana-ui/form'
+import {useForm} from '@mana-ui/form'
 
-// init store
-const store = useStore({a: 'a', b: 'b'})
-<Form init={store}>...</Form>
+// init form
+const form = useForm({a: 'a', b: 'b'})
+<Form init={form}>...</Form>
 
-// get/set value from store:
-store.get() // {a: 'a', b: 'b'}
-store.set('updated b', 'b') // set property b a new value
-store.get('b') // returns 'update b'
+// get/set value by form:
+form.get() // {a: 'a', b: 'b'}
+form.set('updated b', 'b') // set property b a new value
+form.get('b') // returns 'update b'
 ```
 
 3. subscribe to value changes:
 
 ```javascript
-const store = useStore({ a: "a" })
-store.listen((v) => console.log(v)) // log value when data changes
+const form = useForm({ a: "a" })
+form.listen((v) => console.log(v)) // log value when data changes
 ```
+
+4. useStore (DEPRECATED)
+
+useStore is deprecated, use useForm instead
 
 ## Layout
 

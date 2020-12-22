@@ -1,4 +1,4 @@
-import { UPDATE } from "./events"
+import { SUBMIT, SUBMIT_VALIDATE, UPDATE } from "./events"
 
 class Store {
   constructor(initValue, observer) {
@@ -7,13 +7,11 @@ class Store {
     this.get = this.get.bind(this)
     this.set = this.set.bind(this)
     this.listen = this.listen.bind(this)
+    this.submit = this.submit.bind(this)
     this.callbacks = []
   }
   listen(callback) {
     return this.observer.listen(UPDATE, () => callback(this.get()))
-  }
-  setObserver(observer) {
-    this.observer = observer
   }
   get(fullPath = "") {
     let v,
@@ -34,6 +32,13 @@ class Store {
     }
     s[name] = v
     this.observer.emit(UPDATE, fullPath)
+  }
+  async submit() {
+    try {
+      await this.observer.emit(SUBMIT_VALIDATE, "")
+      this.observer.emit(SUBMIT)
+      // eslint-disable-next-line no-empty
+    } catch (e) {}
   }
 }
 

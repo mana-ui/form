@@ -1,14 +1,14 @@
 import Store from "./Store"
 import { useRef } from "react"
+import Observer from "./Observer"
 
-const useStore = (init, observer) => {
+const useStore = (init) => {
   const ref = useRef()
   if (!ref.current) {
     if (init instanceof Store) {
-      init.setObserver(observer)
       ref.current = init
     } else {
-      ref.current = new Store(init, observer)
+      ref.current = new Store(init, new Observer())
     }
   }
   return ref.current

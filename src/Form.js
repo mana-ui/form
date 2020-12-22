@@ -1,5 +1,4 @@
-import React, { createContext, useRef, useMemo } from "react"
-import Observer from "./Observer"
+import React, { createContext, useRef, useMemo, useEffect } from "react"
 import { SUBMIT } from "./events"
 import useStore from "./useStore"
 
@@ -13,13 +12,13 @@ const Form = ({
   control,
   onSubmit,
 }) => {
-  const observerRef = useRef(new Observer())
-  const store = useStore(init, observerRef.current)
+  const store = useStore(init)
+  const observerRef = useRef(store.observer)
 
   const context = useMemo(
     () => ({
       observer: observerRef.current,
-      get: store.get,
+      get: (path) => store.get(path, true),
       set: store.set,
       fieldRender,
       validators,
@@ -28,15 +27,17 @@ const Form = ({
     }),
     [control, fieldRender, store, validators],
   )
-  const submit = async () => {
-    try {
-      await observerRef.current.emit(SUBMIT, "")
+  useEffect(() => {
+    return observerRef.current.listen(SUBMIT, () => {
       onSubmit({ value: store.get() })
-      // eslint-disable-next-line no-empty
-    } catch (e) {}
-  }
+    })
+  })
   return (
-    <Context.Provider value={context}>{children({ submit })}</Context.Provider>
+    <Context.Provider value={context}>
+      {typeof children === "function"
+        ? children({ submit: store.submit })
+        : children}
+    </Context.Provider>
   )
 }
 
