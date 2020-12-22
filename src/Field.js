@@ -25,9 +25,15 @@ const Field = (props) => {
     disabled,
     ...rules
   } = props
-  const { context, value, error, ctxPath } = useField(name, validators, rules, {
-    disabled,
-  })
+  const { context, value, error, ctxPath } = useField(
+    name,
+    validators,
+    rules,
+    {
+      disabled,
+    },
+    { label: labelElem },
+  )
   const r = render || context.fieldRender || defaultRender
   const c = control || context.control || defaultControl
   const formProps = { disabled }

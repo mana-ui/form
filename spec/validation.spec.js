@@ -43,8 +43,9 @@ describe("validator", () => {
     render(
       <App
         validators={{
-          required: (v) => v === "" && "F is required",
-          maxLength: (v, max) => v.length > max && "F exceeds max length",
+          required: (v, _, { label }) => v === "" && <>{label} is required</>,
+          maxLength: (v, max, { label }) =>
+            v.length > max && <>{label} exceeds max length</>,
         }}
       >
         <Field name="f" label="F" required maxLength={5} />

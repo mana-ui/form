@@ -8,6 +8,7 @@ export default function useField(
   validators,
   rules,
   options = { disabled: false },
+  props,
 ) {
   const { disabled } = options
   const context = useContext(Context)
@@ -46,7 +47,7 @@ export default function useField(
     const newValue = get(fullPath)
     return Promise.all(
       Object.entries(rules).map(async ([rule, param]) => {
-        const error = (await v[rule]?.(newValue, param)) || null
+        const error = (await v[rule]?.(newValue, param, props)) || null
         if (error) throw error
       }),
     ).then(
