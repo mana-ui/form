@@ -2,6 +2,7 @@ import { useContext, useState, useEffect, useRef } from "react"
 import { Context } from "./Form"
 import { join } from "./path"
 import { UPDATE, SUBMIT_VALIDATE, VALIDATE } from "./events"
+import { VALIDATION_ERROR } from "./constants"
 
 export default function useField(
   name,
@@ -48,14 +49,16 @@ export default function useField(
     return Promise.all(
       Object.entries(rules).map(async ([rule, param]) => {
         const error = (await v[rule]?.(newValue, param, props)) || null
-        if (error) throw error
+        if (error) {
+          throw { error, type: VALIDATION_ERROR }
+        }
       }),
     ).then(
       () => {
         setError(null)
       },
       (error) => {
-        setError(error)
+        if (error.type === VALIDATION_ERROR) setError(error.error)
         return Promise.reject(error)
       },
     )

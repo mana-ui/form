@@ -1,3 +1,4 @@
+import { VALIDATION_ERROR } from "./constants"
 import { SUBMIT, SUBMIT_VALIDATE, UPDATE } from "./events"
 
 class Store {
@@ -38,7 +39,11 @@ class Store {
       await this.observer.emit(SUBMIT_VALIDATE, "")
       this.observer.emit(SUBMIT)
       // eslint-disable-next-line no-empty
-    } catch (e) {}
+    } catch (e) {
+      if (e.type !== VALIDATION_ERROR) {
+        throw e
+      }
+    }
   }
 }
 
