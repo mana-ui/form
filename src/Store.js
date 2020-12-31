@@ -24,14 +24,19 @@ class Store {
     }
     return v ?? s
   }
-  set(v, fullPath) {
-    const pathes = fullPath.split(".")
+  set(updater, fullPath = "") {
+    const pathes = fullPath.split(".").filter(Boolean)
+    pathes.unshift("value")
     const name = pathes.pop()
-    let s = this.value
+    let s = this
     for (const k of pathes) {
       s = s[k]
     }
-    s[name] = v
+    if (typeof updater === "function") {
+      s[name] = updater(s[name])
+    } else {
+      s[name] = updater
+    }
     this.observer.emit(UPDATE, fullPath)
   }
   async submit() {
