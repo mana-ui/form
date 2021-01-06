@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useEffect, useRef } from "react"
 import { render, screen, waitFor } from "@testing-library/react"
 import Field from "../src/Field"
 import Form from "../src/Form"
@@ -10,10 +10,17 @@ describe("useForm", () => {
     const handleSubmit = jest.fn()
     const Container = () => {
       const form = useForm({ a: "hello" })
+      const prevFormRef = useRef(form)
+      useEffect(() => {
+        prevFormRef.current = form
+      })
       return (
         <Form init={form} onSubmit={handleSubmit}>
           <Field label="A" name="a" />
           {form.get("a")}
+          <span>
+            form identity is {form === prevFormRef.current ? "" : "not"} stable
+          </span>
           <button onClick={form.submit}>Submit</button>
         </Form>
       )
@@ -24,6 +31,7 @@ describe("useForm", () => {
     await waitFor(() => {
       expect(input).toHaveValue("hello world")
     })
+    expect(screen.getByText("form identity is stable")).toBeInTheDocument()
     userEvent.click(screen.getByText("Submit"))
     await waitFor(() => {
       expect(handleSubmit).toHaveBeenCalledWith({ value: { a: "hello world" } })

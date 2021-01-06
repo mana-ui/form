@@ -19,6 +19,8 @@ const form = useForm({ a: "a", b: "b" })
 <Form init={form}>...</Form>
 ```
 
+The form instance identity is guaranted to be stable and won't change on re-renders.
+
 2. The form instance returned by useForm hook is useful when you want to get/set data outside of the form.
 
 ```javascript
