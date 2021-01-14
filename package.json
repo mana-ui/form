@@ -5,7 +5,8 @@
   "main": "src/index.js",
   "scripts": {
     "test": "jest",
-    "changeset": "changeset"
+    "changeset": "changeset",
+    "lint": "eslint src/**/*.js"
   },
   "author": "levinqdl@gmail.com",
   "license": "ISC",
