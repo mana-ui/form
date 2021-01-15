@@ -1,14 +1,14 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { UPDATE } from "./events"
 import useStore from "./useStore"
 
 const useForm = (init) => {
   const updater = useState(0)[1]
-  const toSub = useRef(new Set())
   const store = useStore(init)
+  const toSub = useMemo(() => new Set(), [])
   useEffect(() => {
     const unsubs = []
-    for (const sub of toSub.current) {
+    for (const sub of toSub) {
       unsubs.push(
         store.observer.listen(UPDATE, () => updater((x) => x + 1), sub),
       )
@@ -19,24 +19,24 @@ const useForm = (init) => {
       }
     }
   })
-  const formRef = useRef()
-  if (!formRef.current) {
-    formRef.current = new Proxy(store, {
-      get(target, prop) {
-        if (prop === "get") {
-          return (path, noListen = false) => {
-            const s = store.get(path)
-            if (!noListen) {
-              toSub.current.add(path)
+  return useMemo(
+    () =>
+      new Proxy(store, {
+        get(target, prop) {
+          if (prop === "get") {
+            return (path, noListen = false) => {
+              const s = store.get(path)
+              if (!noListen) {
+                toSub.add(path)
+              }
+              return s
             }
-            return s
           }
-        }
-        return target[prop]
-      },
-    })
-  }
-  return formRef.current
+          return target[prop]
+        },
+      }),
+    [store, toSub],
+  )
 }
 
 export default useForm
