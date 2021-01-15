@@ -25,7 +25,7 @@ const Field = (props) => {
     disabled,
     ...rules
   } = props
-  const { context, value, error, ctxPath } = useField(
+  const { context, error, ctxPath } = useField(
     name,
     validators,
     rules,
@@ -37,11 +37,12 @@ const Field = (props) => {
   const r = render || context.fieldRender || defaultRender
   const c = control || context.control || defaultControl
   const formProps = { disabled }
+  const get = () => context.store.get(context.path, true)
   if (typeof c === "function") {
-    formProps.get = () => value
+    formProps.get = get
     formProps.set = (v, n = name) => context.store.set(v, join(ctxPath, n))
   } else {
-    formProps.value = value
+    formProps.value = get()
     formProps.onChange = ({ target: { value } }) => {
       context.store.set(value, context.path)
     }

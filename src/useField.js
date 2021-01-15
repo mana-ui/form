@@ -41,7 +41,6 @@ export default function useField(
 
   const validate = useRef()
   useEffect(() => observer.listen(VALIDATE, () => validate.current(), fullPath))
-  const value = get(fullPath)
   const [error, setError] = useState(null)
   const selfValidate = () => {
     if (disabled) {
@@ -85,7 +84,6 @@ export default function useField(
       ...context,
       path: fullPath,
     },
-    value,
     ctxPath,
     validators: v,
   }
