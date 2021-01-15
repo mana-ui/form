@@ -13,7 +13,9 @@ export default function useField(
 ) {
   const { disabled } = options
   const context = useContext(Context)
-  const { observer, get, path: ctxPath, validators: ctxValidators } = context
+  const { store, path: ctxPath, validators: ctxValidators } = context
+  const { observer } = store
+  const get = (path) => store.get(path, true)
   const v = {
     ...ctxValidators,
     ...validators,

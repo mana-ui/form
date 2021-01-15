@@ -39,11 +39,11 @@ const Field = (props) => {
   const formProps = { disabled }
   if (typeof c === "function") {
     formProps.get = () => value
-    formProps.set = (v, n = name) => context.set(v, join(ctxPath, n))
+    formProps.set = (v, n = name) => context.store.set(v, join(ctxPath, n))
   } else {
     formProps.value = value
     formProps.onChange = ({ target: { value } }) => {
-      context.set(value, context.path)
+      context.store.set(value, context.path)
     }
   }
 

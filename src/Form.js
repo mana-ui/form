@@ -16,9 +16,7 @@ const Form = ({
 
   const context = useMemo(
     () => ({
-      observer: store.observer,
-      get: (path) => store.get(path, true),
-      set: store.set,
+      store,
       fieldRender,
       validators,
       control,
