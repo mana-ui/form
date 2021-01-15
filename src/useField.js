@@ -1,8 +1,9 @@
-import { useContext, useState, useEffect, useRef } from "react"
+import { useContext, useState, useEffect, useRef, useMemo } from "react"
 import { Context } from "./Form"
 import { join } from "./path"
 import { UPDATE, SUBMIT_VALIDATE, VALIDATE } from "./events"
 import { VALIDATION_ERROR } from "./constants"
+import { FieldRef } from "./Store"
 
 export default function useField(
   name,
@@ -15,12 +16,16 @@ export default function useField(
   const context = useContext(Context)
   const { store, path: ctxPath, validators: ctxValidators } = context
   const { observer } = store
-  const get = (path) => store.get(path, true)
   const v = {
     ...ctxValidators,
     ...validators,
   }
-  const fullPath = join(ctxPath, name)
+  const fieldRef = useMemo(() => {
+    if (name instanceof FieldRef) {
+      return name
+    }
+    return store.fieldRef(join(ctxPath, name), { inField: true })
+  }, [store, name, ctxPath])
   const [updateId, rerender] = useState(0)
   useEffect(() => {
     return observer.listen(
@@ -28,25 +33,27 @@ export default function useField(
       () => {
         rerender((x) => x + 1)
       },
-      fullPath,
+      fieldRef.fullPath,
     )
   })
   const handleSubmit = async () => {
-    if (fullPath !== ctxPath) {
-      await observer.emit(SUBMIT_VALIDATE, fullPath)
+    if (fieldRef.fullPath !== ctxPath) {
+      await observer.emit(SUBMIT_VALIDATE, fieldRef.fullPath)
     }
     return selfValidate()
   }
   useEffect(() => observer.listen(SUBMIT_VALIDATE, handleSubmit, ctxPath))
 
   const validate = useRef()
-  useEffect(() => observer.listen(VALIDATE, () => validate.current(), fullPath))
+  useEffect(() =>
+    observer.listen(VALIDATE, () => validate.current(), fieldRef.fullPath),
+  )
   const [error, setError] = useState(null)
   const selfValidate = () => {
     if (disabled) {
       return
     }
-    const newValue = get(fullPath)
+    const newValue = fieldRef.value
     return Promise.all(
       Object.entries(rules).map(async ([rule, param]) => {
         const error = (await v[rule]?.(newValue, param, props)) || null
@@ -67,7 +74,7 @@ export default function useField(
   validate.current = async () => {
     try {
       await selfValidate()
-      if (fullPath !== ctxPath) {
+      if (fieldRef.fullPath !== ctxPath) {
         return observer.emit(VALIDATE, ctxPath)
       }
       // eslint-disable-next-line no-empty
@@ -82,9 +89,10 @@ export default function useField(
     error,
     context: {
       ...context,
-      path: fullPath,
+      path: fieldRef.fullPath,
     },
     ctxPath,
     validators: v,
+    fieldRef,
   }
 }

@@ -1,7 +1,6 @@
 import React from "react"
 
 import useComponent from "./useComponent"
-import { join } from "./path"
 import useField from "./useField"
 
 const defaultControl = <input />
@@ -18,6 +17,7 @@ const defaultRender = ({ Control, labelElem, error }) => (
 const Field = (props) => {
   const {
     name,
+    fieldRef: field,
     control,
     label: labelElem,
     render,
@@ -25,8 +25,8 @@ const Field = (props) => {
     disabled,
     ...rules
   } = props
-  const { context, error, ctxPath } = useField(
-    name,
+  const { context, error, fieldRef } = useField(
+    name ?? field,
     validators,
     rules,
     {
@@ -37,10 +37,10 @@ const Field = (props) => {
   const r = render || context.fieldRender || defaultRender
   const c = control || context.control || defaultControl
   const formProps = { disabled }
-  const get = () => context.store.get(context.path, true)
+  const get = () => fieldRef.value
   if (typeof c === "function") {
     formProps.get = get
-    formProps.set = (v, n = name) => context.store.set(v, join(ctxPath, n))
+    formProps.set = (v) => (fieldRef.value = v)
   } else {
     formProps.value = get()
     formProps.onChange = ({ target: { value } }) => {
