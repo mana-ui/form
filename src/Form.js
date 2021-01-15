@@ -1,4 +1,4 @@
-import React, { createContext, useRef, useMemo, useEffect } from "react"
+import React, { createContext, useMemo, useEffect } from "react"
 import { SUBMIT } from "./events"
 import useStore from "./useStore"
 
@@ -13,11 +13,10 @@ const Form = ({
   onSubmit,
 }) => {
   const store = useStore(init)
-  const observerRef = useRef(store.observer)
 
   const context = useMemo(
     () => ({
-      observer: observerRef.current,
+      observer: store.observer,
       get: (path) => store.get(path, true),
       set: store.set,
       fieldRender,
@@ -28,7 +27,7 @@ const Form = ({
     [control, fieldRender, store, validators],
   )
   useEffect(() => {
-    return observerRef.current.listen(SUBMIT, () => {
+    return store.observer.listen(SUBMIT, () => {
       onSubmit({ value: store.get() })
     })
   })
