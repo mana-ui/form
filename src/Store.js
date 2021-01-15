@@ -2,6 +2,18 @@ import { VALIDATION_ERROR } from "./constants"
 import { SUBMIT, SUBMIT_VALIDATE, UPDATE } from "./events"
 import cloneDeep from "lodash.clonedeep"
 
+export class FieldRef {
+  constructor(store, fullPath) {
+    this.store = store
+    this.fullPath = fullPath
+  }
+  get value() {
+    return this.store.get(this.fullPath)
+  }
+  set value(v) {
+    this.store.set(v, this.fullPath)
+  }
+}
 class Store {
   constructor(initValue, observer) {
     this.value = cloneDeep(initValue)
@@ -11,6 +23,7 @@ class Store {
     this.listen = this.listen.bind(this)
     this.submit = this.submit.bind(this)
     this.callbacks = []
+    this.fields = new Map()
   }
   listen(callback) {
     return this.observer.listen(UPDATE, () => callback(this.get()))
@@ -39,6 +52,15 @@ class Store {
       s[name] = updater
     }
     this.observer.emit(UPDATE, fullPath)
+  }
+  fieldRef(fullPath, { inField = false } = {}) {
+    if (this.fields.has(fullPath)) {
+      if (inField) console.error(`${fullPath} fieldRef already exists`)
+    } else {
+      const fieldRef = new FieldRef(this, fullPath)
+      this.fields.set(fullPath, fieldRef)
+    }
+    return this.fields.get(fullPath)
   }
   async submit() {
     try {
