@@ -36,6 +36,6 @@ describe("associate_update", () => {
     await waitFor(() => {
       expect(screen.getByLabelText("B")).toHaveValue("123")
     })
-    expect(console.error).toHaveBeenCalledWith("b fieldRef already exists")
+    expect(console.error).toHaveBeenCalledWith("fieldRef of 'b' already exists")
   })
 })
