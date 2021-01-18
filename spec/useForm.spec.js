@@ -10,14 +10,15 @@ describe("useForm", () => {
     const handleSubmit = jest.fn()
     const Container = () => {
       const form = useForm({ a: "hello" })
+      const a = form.fieldRef("a")
       const prevFormRef = useRef(form)
       useEffect(() => {
         prevFormRef.current = form
       })
       return (
         <Form init={form} onSubmit={handleSubmit}>
-          <Field label="A" name="a" />
-          {form.get("a")}
+          <Field label="A" fieldRef={a} />
+          {a.value}
           <span>
             form identity is {form === prevFormRef.current ? "" : "not"} stable
           </span>

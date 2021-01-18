@@ -16,12 +16,13 @@ describe("associate_update", () => {
           <Field
             name="a"
             label="A"
-            control={({ get, set }) => (
+            control={({ field: a }) => (
               <input
-                value={get()}
+                value={"$" + a.value}
                 onChange={({ target: { value } }) => {
-                  set(value)
-                  b.value = value
+                  const v = value.substring(1)
+                  a.value = v
+                  b.value = v
                 }}
               />
             )}
@@ -34,6 +35,7 @@ describe("associate_update", () => {
     const inputA = screen.getByLabelText("A")
     userEvent.type(inputA, "123")
     await waitFor(() => {
+      expect(screen.getByLabelText("A")).toHaveValue("$123")
       expect(screen.getByLabelText("B")).toHaveValue("123")
     })
     expect(console.error).toHaveBeenCalledWith("fieldRef of 'b' already exists")

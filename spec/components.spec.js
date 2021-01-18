@@ -40,12 +40,12 @@ describe("Form control component", () => {
         <Field
           name="c"
           label="C"
-          control={({ get, set }) => (
+          control={({ field }) => (
             <input
               className="custom-c"
               type="checkbox"
-              checked={get()}
-              onChange={({ target: { checked } }) => set(checked)}
+              checked={field.value}
+              onChange={({ target: { checked } }) => (field.value = checked)}
             />
           )}
         />

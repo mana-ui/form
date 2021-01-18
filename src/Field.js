@@ -37,16 +37,12 @@ const Field = (props) => {
   const r = render || context.fieldRender || defaultRender
   const c = control || context.control || defaultControl
   const formProps = { disabled }
-  const get = () => {
-    return fieldRef.value
-  }
   if (typeof c === "function") {
-    formProps.get = get
-    formProps.set = (v) => (fieldRef.value = v)
+    formProps.field = fieldRef
   } else {
-    formProps.value = get()
+    formProps.value = fieldRef.value
     formProps.onChange = ({ target: { value } }) => {
-      context.store.set(value, context.path.fullPath)
+      fieldRef.value = value
     }
   }
 
