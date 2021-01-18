@@ -37,19 +37,21 @@ const Field = (props) => {
   const r = render || context.fieldRender || defaultRender
   const c = control || context.control || defaultControl
   const formProps = { disabled }
-  const get = () => fieldRef.value
+  const get = () => {
+    return fieldRef.value
+  }
   if (typeof c === "function") {
     formProps.get = get
     formProps.set = (v) => (fieldRef.value = v)
   } else {
     formProps.value = get()
     formProps.onChange = ({ target: { value } }) => {
-      context.store.set(value, context.path)
+      context.store.set(value, context.path.fullPath)
     }
   }
 
   const Control = useComponent(c, formProps)
-  return r({ Control, labelElem, error, id: context.path }, props)
+  return r({ Control, labelElem, error, id: context.path.fullPath }, props)
 }
 
 export default Field

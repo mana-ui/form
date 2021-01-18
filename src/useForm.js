@@ -27,7 +27,7 @@ const useForm = (init) => {
             return (path, noListen = false) => {
               const s = store.get(path)
               if (!noListen) {
-                toSub.add(path)
+                toSub.add(store.fields.get(path))
               }
               return s
             }
