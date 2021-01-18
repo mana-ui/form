@@ -10,9 +10,9 @@ const ArrayField = ({
   ...rules
 }) => {
   const { context } = useField(name, validators, rules)
-  return context.store.get(context.path, true).map((v, i) => (
+  return context.store.get(context.path.fullPath, true).map((v, i) => (
     <Context.Provider
-      value={{ ...context, path: `${context.path}.${i}` }}
+      value={{ ...context, path: context.path.extend(i) }}
       key={getKey(v, i)}
     >
       {children}

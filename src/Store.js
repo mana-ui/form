@@ -1,18 +1,8 @@
 import { VALIDATION_ERROR } from "./constants"
 import { SUBMIT, SUBMIT_VALIDATE, UPDATE } from "./events"
+import FieldRef from "./FieldRef"
+import { join } from "./path"
 
-export class FieldRef {
-  constructor(store, fullPath) {
-    this.store = store
-    this.fullPath = fullPath
-  }
-  get value() {
-    return this.store.get(this.fullPath)
-  }
-  set value(v) {
-    this.store.set(v, this.fullPath)
-  }
-}
 class Store {
   constructor(initValue, observer) {
     this.value = initValue
@@ -50,11 +40,14 @@ class Store {
     } else {
       s[name] = updater
     }
-    this.observer.emit(UPDATE, fullPath)
+    this.observer.emit(UPDATE, this.fields.get(fullPath))
   }
-  fieldRef(fullPath, { inField = false } = {}) {
+  fieldRef(ctxPath, name, { inField = false } = {}) {
+    const fullPath = join(ctxPath, name)
     if (this.fields.has(fullPath)) {
-      if (inField) console.error(`${fullPath} fieldRef already exists`)
+      if (inField && name) {
+        console.error(`fieldRef of '${fullPath}' already exists`)
+      }
     } else {
       const fieldRef = new FieldRef(this, fullPath)
       this.fields.set(fullPath, fieldRef)
@@ -63,7 +56,7 @@ class Store {
   }
   async submit() {
     try {
-      await this.observer.emit(SUBMIT_VALIDATE, "")
+      await this.observer.emit(SUBMIT_VALIDATE, this.fields.get(""))
       this.observer.emit(SUBMIT)
       // eslint-disable-next-line no-empty
     } catch (e) {
