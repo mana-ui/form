@@ -20,7 +20,7 @@ const Form = ({
       fieldRender,
       validators,
       control,
-      path: store.fieldRef(""),
+      path: store.rootField,
     }),
     [control, fieldRender, store, validators],
   )

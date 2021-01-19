@@ -10,7 +10,7 @@ describe("associate_update", () => {
     console.error = jest.fn()
     const Container = () => {
       const form = useForm({ a: "", b: "" })
-      const b = form.fieldRef("b")
+      const b = form.field("b")
       return (
         <App initValue={form}>
           <Field
