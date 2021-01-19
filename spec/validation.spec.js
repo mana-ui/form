@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event"
 import React, { useState } from "react"
 import { Field } from "../src/"
 import App from "./App"
-import { useStore } from "../src/index"
+import { useForm } from "../src/index"
 
 describe("validator", () => {
   test("inline validator", async () => {
@@ -73,10 +73,11 @@ describe("validator", () => {
     const handleSubmit = jest.fn()
     const Container = () => {
       const [disabled, setDisabled] = useState(false)
-      const store = useStore({ f: "" })
+      const form = useForm({ f: "" })
+      const f = form.field("f")
       return (
         <App
-          initValue={store}
+          initValue={form}
           onSubmit={handleSubmit}
           validators={{
             required: (v) => v === "" && "F is required",
@@ -84,11 +85,11 @@ describe("validator", () => {
         >
           {({ submit }) => (
             <>
-              <Field name="f" label="F" disabled={disabled} required />
+              <Field fieldRef={f} label="F" disabled={disabled} required />
               <button
                 onClick={() => {
                   setDisabled(true)
-                  store.set("", "f")
+                  f.value = ""
                 }}
               >
                 toggle

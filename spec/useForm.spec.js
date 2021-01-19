@@ -11,7 +11,7 @@ describe("useForm", () => {
     const handleSubmit = jest.fn()
     const Container = () => {
       const form = useForm(initValue)
-      const a = form.fieldRef("a")
+      const a = form.field("a")
       const prevFormRef = useRef(form)
       useEffect(() => {
         prevFormRef.current = form
