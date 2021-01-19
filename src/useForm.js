@@ -23,13 +23,11 @@ const useForm = (init) => {
     () =>
       new Proxy(store, {
         get(target, prop) {
-          if (prop === "get") {
-            return (path, noListen = false) => {
-              const s = store.get(path)
-              if (!noListen) {
-                toSub.add(store.fields.get(path))
-              }
-              return s
+          if (prop === "field") {
+            return (path) => {
+              const field = store.field(path)
+              toSub.add(field)
+              return field
             }
           }
           return target[prop]
