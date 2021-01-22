@@ -15,8 +15,8 @@ describe("IterableField", () => {
         <button onClick={remove}>remove</button>
       </span>
     )
-    const List = () => {
-      const [ListField, list] = useListField()
+    const List = ({ name }) => {
+      const [ListField, list] = useListField({ name })
       return (
         <>
           <span onClick={() => list.append({ a: "a3" })}>Append</span>
@@ -28,10 +28,10 @@ describe("IterableField", () => {
       )
     }
     const Container = () => {
-      const form = useForm([{ a: "a1" }, { a: "a2" }])
+      const form = useForm({ arr: [{ a: "a1" }, { a: "a2" }] })
       return (
         <App initValue={form}>
-          <List />
+          <List name="arr" />
         </App>
       )
     }

@@ -1,5 +1,6 @@
 import React, { useMemo } from "react"
 import { Context } from "./Form"
+import { join } from "./path"
 import useField from "./useField"
 
 class List {
@@ -52,7 +53,7 @@ const useListField = ({ name = "" } = {}) => {
             ...context,
             path: context.path.extend(k, {
               getPath: (ctxPath) => {
-                return ctxPath + list.keys.indexOf(k)
+                return join(ctxPath, list.keys.indexOf(k))
               },
             }),
           }}
