@@ -1,3 +1,8 @@
+/* eslint-env node */
 module.exports = {
-  presets: [[ '@babel/env' , {useBuiltIns: 'usage', corejs:3}], '@babel/react']
+  ignore: [/core-js/],
+  presets: [
+    ["@babel/env", { useBuiltIns: "usage", corejs: 3 }],
+    "@babel/react",
+  ],
 }
