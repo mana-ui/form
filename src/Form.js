@@ -2,7 +2,7 @@ import React, { createContext, useMemo, useEffect } from "react"
 import { SUBMIT } from "./events"
 import useStore from "./useStore"
 
-export const Context = createContext()
+export const Context = createContext({})
 
 const Form = ({
   init,
