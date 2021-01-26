@@ -1,17 +1,18 @@
-import { useContext, useState, useEffect, useRef, useMemo } from "react"
+import { useContext, useState, useEffect, useRef } from "react"
 import { Context } from "./Form"
 import { UPDATE, SUBMIT_VALIDATE, VALIDATE } from "./events"
 import { VALIDATION_ERROR } from "./constants"
 import FieldRef from "./FieldRef"
+import useExtendField from "./useExtendField"
 
 export default function useField(
   name,
   validators,
   rules,
-  options = { disabled: false },
+  options = { disabled: false, Type: FieldRef },
   props,
 ) {
-  const { disabled } = options
+  const { disabled, Type } = options
   const context = useContext(Context)
   const { store, path: ctxField, validators: ctxValidators } = context
   const { observer } = store
@@ -19,12 +20,7 @@ export default function useField(
     ...ctxValidators,
     ...validators,
   }
-  const fieldRef = useMemo(() => {
-    if (name instanceof FieldRef) {
-      return name
-    }
-    return ctxField.extend(name, { inField: true })
-  }, [name, ctxField])
+  const fieldRef = useExtendField(name, ctxField, Type)
   const [updateId, rerender] = useState(0)
   useEffect(() => {
     return observer.listen(
