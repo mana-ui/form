@@ -25,7 +25,7 @@ class FieldRef {
   set value(v) {
     this.store.set(v, this)
   }
-  extend(name, { inField = false, getPath } = {}) {
+  extend(name, { inField = false, getPath, Type = FieldRef } = {}) {
     const fullName = join(this.fullName, name)
     if (this.fullName === fullName) {
       return this
@@ -35,7 +35,7 @@ class FieldRef {
         console.error(`fieldRef of '${fullName}' already exists`)
       }
     } else {
-      const fieldRef = new FieldRef(this, name, getPath)
+      const fieldRef = new Type(this, name, getPath)
       this.children.set(fullName, fieldRef)
     }
     return this.children.get(fullName)
