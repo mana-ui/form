@@ -43,10 +43,10 @@ class List extends FieldRef {
   }
 }
 
-const useListField = ({ field } = {}) => {
+const useListField = (field, form) => {
   const context = useContext(Context)
   const { path } = context
-  const fieldRef = useExtendField(field, path, List)
+  const fieldRef = useExtendField(field, path ?? form.rootField, List)
   return fieldRef
 }
 
