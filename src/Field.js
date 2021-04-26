@@ -19,6 +19,7 @@ const Field = (props) => {
     name,
     fieldRef: field,
     control,
+    children,
     label: labelElem,
     render,
     validators = {},
@@ -35,14 +36,20 @@ const Field = (props) => {
     { label: labelElem },
   )
   const r = render || context.fieldRender || defaultRender
-  const c = control || context.control || defaultControl
+  const c = children ?? control ?? context.control ?? defaultControl
   const formProps = { disabled }
   if (typeof c === "function") {
     formProps.field = fieldRef
   } else {
     formProps.value = fieldRef.value
-    formProps.onChange = ({ target: { value } }) => {
-      fieldRef.value = value
+    if (children) {
+      formProps.onChange = (value) => {
+        fieldRef.value = value
+      }
+    } else {
+      formProps.onChange = ({ target: { value } }) => {
+        fieldRef.value = value
+      }
     }
   }
 
