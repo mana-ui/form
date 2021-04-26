@@ -26,7 +26,7 @@ const Form = ({
   )
   useEffect(() => {
     return store.observer.listen(SUBMIT, () => {
-      onSubmit({ value: store.get() })
+      onSubmit(store.get())
     })
   })
   return (

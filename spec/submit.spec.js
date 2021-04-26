@@ -25,9 +25,7 @@ describe("Form submission", () => {
     )
     userEvent.click(screen.getByText("submit"))
     await waitFor(() => {
-      expect(handleSubmit).toHaveBeenLastCalledWith({
-        value: { a: "x", b: "y" },
-      })
+      expect(handleSubmit).toHaveBeenLastCalledWith({ a: "x", b: "y" })
     })
   })
   test("validation failure block submit", async () => {

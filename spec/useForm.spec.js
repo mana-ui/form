@@ -36,7 +36,7 @@ describe("useForm", () => {
     expect(screen.getByText("form identity is stable")).toBeInTheDocument()
     userEvent.click(screen.getByText("Submit"))
     await waitFor(() => {
-      expect(handleSubmit).toHaveBeenCalledWith({ value: { a: "hello world" } })
+      expect(handleSubmit).toHaveBeenCalledWith({ a: "hello world" })
     })
 
     expect(await screen.findByText("hello world")).toBeInTheDocument()
