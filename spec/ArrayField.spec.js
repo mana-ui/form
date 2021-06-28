@@ -5,7 +5,6 @@ import { Field, useForm } from "../src"
 import { screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import useListField from "../src/useListField"
-import ListField from "../src/ListField"
 
 describe("ListField", () => {
   test("define by string path", async () => {
@@ -17,15 +16,13 @@ describe("ListField", () => {
       </span>
     )
     const List = ({ name }) => {
-      const list = useListField(name)
+      const [ListField, list] = useListField(name)
       return (
         <>
           <span onClick={() => list.append({ a: "a3" })}>Append</span>
           <span onClick={() => list.prepend({ a: "a4" })}>Prepend</span>
           <span onClick={() => list.clear()}>Clear</span>
-          <ListField field={list}>
-            <Item />
-          </ListField>
+          <ListField>{(item) => <Item remove={item.remove} />}</ListField>
         </>
       )
     }
@@ -70,24 +67,15 @@ describe("ListField", () => {
         <button onClick={remove}>remove</button>
       </span>
     )
-    const List = ({ list }) => {
+    const Container = () => {
+      const form = useForm({ arr: [{ a: "a1" }, { a: "a2" }] })
+      const [ListField, list] = useListField("arr", form)
       return (
-        <>
+        <App initValue={form}>
           <span onClick={() => list.append({ a: "a3" })}>Append</span>
           <span onClick={() => list.prepend({ a: "a4" })}>Prepend</span>
           <span onClick={() => list.clear()}>Clear</span>
-          <ListField field={list}>
-            <Item />
-          </ListField>
-        </>
-      )
-    }
-    const Container = () => {
-      const form = useForm({ arr: [{ a: "a1" }, { a: "a2" }] })
-      const list = useListField("arr", form)
-      return (
-        <App initValue={form}>
-          <List list={list} />
+          <ListField>{(item) => <Item remove={item.remove} />}</ListField>
         </App>
       )
     }

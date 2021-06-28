@@ -1,6 +1,6 @@
 import React, { cloneElement } from "react"
 import { Context } from "./Form"
-import useField from "./useField"
+import useFieldControl from "./useFieldControl"
 
 const ArrayField = ({
   name = "",
@@ -9,7 +9,7 @@ const ArrayField = ({
   getKey = (_, i) => i,
   ...rules
 }) => {
-  const { context } = useField(name, validators, rules)
+  const { context } = useFieldControl(name, validators, rules)
   return context.store.get(context.path.fullPath, true).map((v, i) => (
     <Context.Provider
       value={{ ...context, path: context.path.extend(i) }}
@@ -21,7 +21,7 @@ const ArrayField = ({
 }
 
 export const Action = ({ children, ...props }) => {
-  const { value } = useField("")
+  const { value } = useFieldControl("")
   const boundProps = Object.entries(props).reduce((boundProps, [k, v]) => {
     boundProps[k] = () => v(value)
     return boundProps
