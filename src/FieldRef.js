@@ -6,12 +6,13 @@ class FieldRef {
     field.store = store
     return field
   }
-  constructor(parent, name, getPath) {
+  constructor(parent, name, getPath, hookId) {
     this.store = parent?.store
     this.parent = parent
     this.name = name
     this.getPath = getPath ?? (() => join(this.parent?.fullPath, this.name))
     this.children = new Map()
+    this.hookId = hookId
   }
   get fullPath() {
     return this.getPath(this.parent?.fullPath ?? "")
@@ -25,17 +26,19 @@ class FieldRef {
   set value(v) {
     this.store.set(v, this)
   }
-  extend(name, { inField = false, getPath, Type = FieldRef } = {}) {
+  extend(name, { hookId, getPath } = {}) {
     const fullName = join(this.fullName, name)
     if (this.fullName === fullName) {
       return this
     }
+    let fieldRef
     if (this.children.has(fullName)) {
-      if (inField && name) {
+      fieldRef = this.children.get(fullName)
+      if (hookId && name && fieldRef.hookId !== hookId) {
         console.error(`fieldRef of '${fullName}' already exists`)
       }
     } else {
-      const fieldRef = new Type(this, name, getPath)
+      fieldRef = new FieldRef(this, name, getPath, hookId)
       this.children.set(fullName, fieldRef)
     }
     return this.children.get(fullName)

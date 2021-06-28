@@ -1,7 +1,7 @@
 import React from "react"
 
 import useComponent from "./useComponent"
-import useField from "./useField"
+import useFieldControl from "./useFieldControl"
 
 const defaultControl = <input />
 
@@ -26,7 +26,7 @@ const Field = (props) => {
     disabled,
     ...rules
   } = props
-  const { context, error, fieldRef } = useField(
+  const { context, error, fieldRef } = useFieldControl(
     name ?? field,
     validators,
     rules,

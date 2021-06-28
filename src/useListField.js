@@ -1,53 +1,51 @@
-import { useContext } from "react"
-import FieldRef from "./FieldRef"
-import { Context } from "./Form"
-import useExtendField from "./useExtendField"
-
-class List extends FieldRef {
-  constructor(...args) {
-    super(...args)
-    this.keys = []
-    this.nextKey = 1
-    for (let k = 0; k < super.value.length; k++) {
-      this.keys.push(this.getKey())
-    }
-  }
-  set value(v) {
-    throw new Error("List can not use value setter")
-  }
-  clear() {
-    this.keys = []
-    super.value = []
-  }
-  getKey() {
-    return this.nextKey++
-  }
-  map(...args) {
-    return this.keys.map(...args)
-  }
-  prepend(v) {
-    this.keys.unshift(this.getKey())
-    const value = super.value
-    super.value = [v, ...value]
-  }
-  append(v) {
-    const value = super.value
-    this.keys.push(this.getKey())
-    super.value = [...value, v]
-  }
-  remove(i) {
-    this.keys.splice(i, 1)
-    const value = super.value
-    value.splice(i, 1)
-    super.value = value
-  }
-}
+import React, { useMemo, useRef } from "react"
+import idGenFn from "./idGenFn"
+import KEYS from "./keysSymbol"
+import ListField from "./ListField"
+import { useFieldWithUpdateId } from "./useField"
 
 const useListField = (field, form) => {
-  const context = useContext(Context)
-  const { path } = context
-  const fieldRef = useExtendField(field, path ?? form.rootField, List)
-  return fieldRef
+  const [fieldRef] = useFieldWithUpdateId(field, form)
+  const listFieldRef = useRef()
+  const ListComponentRef = useRef()
+  return useMemo(() => {
+    const keys = []
+    const idGen = idGenFn()
+    for (let k = 0; k < fieldRef.value.length; k++) {
+      keys.push(idGen.next().value)
+    }
+    fieldRef[KEYS] = keys
+    const listField = Object.assign(fieldRef, {
+      prepend(v) {
+        fieldRef[KEYS].unshift(idGen.next().value)
+        const value = fieldRef.value
+        fieldRef.value = [v, ...value]
+      },
+      append(v) {
+        const value = fieldRef.value
+        fieldRef[KEYS].push(idGen.next().value)
+        fieldRef.value = [...value, v]
+      },
+      remove(i) {
+        fieldRef[KEYS].splice(i, 1)
+        const value = fieldRef.value
+        value.splice(i, 1)
+        fieldRef.value = value
+      },
+      clear() {
+        fieldRef[KEYS] = []
+        fieldRef.value = []
+      },
+    })
+    if (!listFieldRef.current || listField !== listFieldRef.current) {
+      ListComponentRef.current = ({ children }) => (
+        <ListField listField={listField}>{children}</ListField>
+      )
+      listFieldRef.current = listField
+    }
+
+    return [ListComponentRef.current, listField]
+  }, [fieldRef])
 }
 
 export default useListField

@@ -1,27 +1,25 @@
-import { useContext, useState, useEffect, useRef } from "react"
-import { Context } from "./Form"
-import { UPDATE, SUBMIT_VALIDATE, VALIDATE } from "./events"
-import { VALIDATION_ERROR } from "./constants"
+import { useContext, useEffect, useMemo, useRef, useState } from "react"
+import { UPDATE } from "./events"
 import FieldRef from "./FieldRef"
-import useExtendField from "./useExtendField"
+import { Context } from "./Form"
+import idGenFn from "./idGenFn"
 
-export default function useField(
-  name,
-  validators,
-  rules,
-  options = { disabled: false, Type: FieldRef },
-  props,
-) {
-  const { disabled, Type } = options
-  const context = useContext(Context)
-  const { store, path: ctxField, validators: ctxValidators } = context
-  const { observer } = store
-  const v = {
-    ...ctxValidators,
-    ...validators,
-  }
-  const fieldRef = useExtendField(name, ctxField, Type)
+const idGen = idGenFn()
+
+export const useFieldWithUpdateId = (name, form) => {
+  // fast refresh preserve useRef value, so that we can skip duplicated field ref waning in fast refresh update
+  const idRef = useRef(null)
+  const { path, store } = useContext(Context)
+  const observer = store?.observer ?? form.observer
   const [updateId, rerender] = useState(0)
+  const fieldRef = useMemo(() => {
+    if (name instanceof FieldRef) {
+      return name
+    }
+    idRef.current = idRef.current ?? idGen.next().value
+    const ctxField = path ?? form.rootField
+    return ctxField.extend(name, { hookId: idRef.current })
+  }, [name, path, form])
   useEffect(() => {
     return observer.listen(
       UPDATE,
@@ -31,61 +29,12 @@ export default function useField(
       fieldRef,
     )
   })
-  const handleSubmit = async () => {
-    if (fieldRef !== ctxField) {
-      await observer.emit(SUBMIT_VALIDATE, fieldRef)
-    }
-    return selfValidate()
-  }
-  useEffect(() => observer.listen(SUBMIT_VALIDATE, handleSubmit, ctxField))
-
-  const validate = useRef()
-  useEffect(() => observer.listen(VALIDATE, () => validate.current(), fieldRef))
-  const [error, setError] = useState(null)
-  const selfValidate = () => {
-    if (disabled) {
-      return
-    }
-    const newValue = fieldRef.value
-    return Promise.all(
-      Object.entries(rules).map(async ([rule, param]) => {
-        const error = (await v[rule]?.(newValue, param, props)) || null
-        if (error) {
-          throw { error, type: VALIDATION_ERROR }
-        }
-      }),
-    ).then(
-      () => {
-        setError(null)
-      },
-      (error) => {
-        if (error.type === VALIDATION_ERROR) setError(error.error)
-        return Promise.reject(error)
-      },
-    )
-  }
-  validate.current = async () => {
-    try {
-      await selfValidate()
-      if (fieldRef !== ctxField) {
-        return observer.emit(VALIDATE, ctxField)
-      }
-      // eslint-disable-next-line no-empty
-    } catch (e) {}
-  }
-  useEffect(() => {
-    if (updateId) {
-      validate.current()
-    }
-  }, [updateId])
-  return {
-    error,
-    context: {
-      ...context,
-      path: fieldRef,
-    },
-    ctxPath: ctxField,
-    validators: v,
-    fieldRef,
-  }
+  return [fieldRef, updateId]
 }
+
+const useField = (name, form) => {
+  const [fieldRef] = useFieldWithUpdateId(name, form)
+  return fieldRef
+}
+
+export default useField
