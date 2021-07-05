@@ -1,9 +1,10 @@
 import { VALIDATION_ERROR } from "./constants"
 import { SUBMIT, SUBMIT_VALIDATE, UPDATE } from "./events"
+import cloneDeep from "lodash.clonedeep"
 
 class Store {
   constructor(initValue, observer) {
-    this.value = initValue
+    this.value = cloneDeep(initValue)
     this.observer = observer
     this.get = this.get.bind(this)
     this.set = this.set.bind(this)

@@ -6,10 +6,11 @@ import useForm from "../src/useForm"
 import userEvent from "@testing-library/user-event"
 
 describe("useForm", () => {
+  const initValue = { a: "hello" }
   test("useForm returns form instance", async () => {
     const handleSubmit = jest.fn()
     const Container = () => {
-      const form = useForm({ a: "hello" })
+      const form = useForm(initValue)
       const prevFormRef = useRef(form)
       useEffect(() => {
         prevFormRef.current = form
@@ -38,5 +39,8 @@ describe("useForm", () => {
     })
 
     expect(await screen.findByText("hello world")).toBeInTheDocument()
+  })
+  test("init value is cloned, won't be changed", () => {
+    expect(initValue).toEqual({ a: "hello" })
   })
 })
