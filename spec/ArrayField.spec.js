@@ -104,4 +104,34 @@ describe("ListField", () => {
 
     expect(console.error).not.toHaveBeenCalled()
   })
+  test("validate field of list item on list field as root field", async () => {
+    const Item = ({ remove }) => (
+      <span>
+        <Field
+          name="a"
+          label="A"
+          validators={{ required: (v) => v === "" && "A is required" }}
+          required
+        />
+        <button onClick={remove}>remove</button>
+      </span>
+    )
+    const handleSubmit = jest.fn()
+    const Container = () => {
+      const form = useForm([{ a: "" }])
+      const [ListField] = useListField("", form)
+      return (
+        <App initValue={form} onSubmit={handleSubmit}>
+          <ListField>{(item) => <Item remove={item.remove} />}</ListField>
+          <button onClick={form.submit}>Submit</button>
+        </App>
+      )
+    }
+    render(<Container />)
+    userEvent.click(screen.getByRole("button", { name: "Submit" }))
+    await waitFor(() => {
+      expect(screen.queryByText("A is required")).toBeInTheDocument()
+    })
+    expect(handleSubmit).not.toHaveBeenCalled()
+  })
 })
