@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useEffect } from "react"
 import { render, screen, waitFor } from "@testing-library/react"
 import App from "./App"
 import Field from "../src/Field"
@@ -10,7 +10,16 @@ describe("associate_update", () => {
     console.error = jest.fn()
     const Container = () => {
       const form = useForm({ a: "", b: "" })
+      const a = form.field("a")
       const b = form.field("b")
+      useEffect(() =>
+        form.listen((v) => {
+          b.value = v
+        }, a),
+      )
+      if (a.value !== "" && b.value === "") {
+        throw new Error("a & b update in different render")
+      }
       return (
         <App initValue={form}>
           <Field
@@ -22,7 +31,6 @@ describe("associate_update", () => {
                 onChange={({ target: { value } }) => {
                   const v = value.substring(1)
                   a.value = v
-                  b.value = v
                 }}
               />
             )}

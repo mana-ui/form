@@ -15,8 +15,14 @@ class Store {
     this.fields = new Map()
     this.rootField = FieldRef.createRoot(this)
   }
-  listen(callback) {
-    return this.observer.listen(UPDATE, () => callback(this.get()))
+  listen(callback, fieldRef = null) {
+    return this.observer.listen(
+      UPDATE,
+      () => {
+        callback(fieldRef ? fieldRef.value : this.get())
+      },
+      fieldRef,
+    )
   }
   get(fullPath = "") {
     let v,
