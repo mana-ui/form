@@ -36,7 +36,30 @@ form.set('updated b', 'b') // set property b a new value
 form.get('b') // returns 'update b'
 ```
 
-3. subscribe to value changes:
+3. associate update:
+
+use form.listen to subscribe a field update, and update other fields:
+
+```javascript
+const App = () => {
+  const form = useForm({ a: "", b: "" })
+  const A = form.field("a")
+  const B = form.field("b")
+  useEffect(() => form.listen((v) => (B.value = v), A))
+  return (
+    <Form init={form}>
+      <Field name={A} label="A" />
+      <Field name={B} label="B" />
+    </Form>
+  )
+}
+```
+
+First arg is a callback, which receives the changed value, and you can set any other fields in the callback. Listen to field a by pass fieldRef of A to second argument.
+
+form.listen make sure A and B updates renders in same batch.
+
+form.listen can also subscribe to any form data changes by omit second argument:
 
 ```javascript
 const form = useForm({ a: "a" })
