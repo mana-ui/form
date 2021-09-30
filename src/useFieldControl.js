@@ -11,7 +11,7 @@ export default function useFieldControl(
   options = { disabled: false },
   props,
 ) {
-  const [fieldRef, updateId] = useFieldWithUpdateId(name)
+  const [fieldRef, updateId, skipValidation] = useFieldWithUpdateId(name)
   const { disabled } = options
   const context = useContext(Context)
   const { store, path: ctxField, validators: ctxValidators } = context
@@ -63,10 +63,10 @@ export default function useFieldControl(
     } catch (e) {}
   }
   useEffect(() => {
-    if (updateId) {
+    if (updateId && !skipValidation) {
       validate.current()
     }
-  }, [updateId])
+  }, [updateId, skipValidation])
   return {
     error,
     context: {

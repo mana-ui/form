@@ -21,7 +21,12 @@ describe("associate_update", () => {
         throw new Error("a & b update in different render")
       }
       return (
-        <App initValue={form}>
+        <App
+          initValue={form}
+          validators={{
+            required: (v) => v === "" && "required",
+          }}
+        >
           <Field
             name="a"
             label="A"
@@ -35,7 +40,7 @@ describe("associate_update", () => {
               />
             )}
           />
-          <Field name="b" label="B" />
+          <Field name="b" label="B" required />
         </App>
       )
     }
@@ -47,5 +52,9 @@ describe("associate_update", () => {
       expect(screen.getByLabelText("B")).toHaveValue("123")
     })
     expect(console.error).toHaveBeenCalledWith("fieldRef of 'b' already exists")
+    userEvent.type(inputA, "{selectall}{del}")
+    await waitFor(() => {
+      expect(screen.queryByText("required")).not.toBeInTheDocument()
+    })
   })
 })

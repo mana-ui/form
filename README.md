@@ -45,7 +45,11 @@ const App = () => {
   const form = useForm({ a: "", b: "" })
   const A = form.field("a")
   const B = form.field("b")
-  useEffect(() => form.listen((v) => (B.value = v), A))
+  useEffect(() =>
+    form.listen((v) => {
+      B.value = v // won't trigger validation
+    }, A),
+  )
   return (
     <Form init={form}>
       <Field name={A} label="A" />
@@ -58,6 +62,8 @@ const App = () => {
 First arg is a callback, which receives the changed value, and you can set any other fields in the callback. Listen to field a by pass fieldRef of A to second argument.
 
 form.listen make sure A and B updates renders in same batch.
+
+Usually the value of associate update is valid or reset to default empty. In the later case, it is annoying to yell at user to fill the required field, since it is not changed by user directly. So associate update doesn't trigger validation.
 
 form.listen can also subscribe to any form data changes by omit second argument:
 

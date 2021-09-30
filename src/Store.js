@@ -19,7 +19,9 @@ class Store {
     return this.observer.listen(
       UPDATE,
       () => {
+        this.skipValidation = true
         callback(fieldRef ? fieldRef.value : this.get())
+        this.skipValidation = false
       },
       fieldRef,
     )
@@ -47,7 +49,7 @@ class Store {
     } else {
       s[name] = updater
     }
-    this.observer.emit(UPDATE, field)
+    this.observer.emit(UPDATE, field, this.skipValidation)
   }
   field(path) {
     const pathes = path.split(".")

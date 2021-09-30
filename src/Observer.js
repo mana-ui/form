@@ -2,12 +2,12 @@ class Observer {
   constructor() {
     this.register = new Map()
   }
-  emit(event, path) {
+  emit(event, path, ...args) {
     const items = this.register.get(event) ?? []
     return Promise.all(
       items
         .filter(({ fullPath }) => fullPath === null || fullPath === path)
-        .map(({ callback }) => callback()),
+        .map(({ callback }) => callback(...args)),
     )
   }
   listen(event, callback, fullPath = null) {
