@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useRef, useState } from "react"
+import { useContext, useEffect, useMemo, useReducer, useRef } from "react"
 import { UPDATE } from "./events"
 import FieldRef from "./FieldRef"
 import { Context } from "./Form"
@@ -6,12 +6,19 @@ import idGenFn from "./idGenFn"
 
 const idGen = idGenFn()
 
+function reducer({ updateId }, skipValidation) {
+  return { updateId: updateId + 1, skipValidation }
+}
+
 export const useFieldWithUpdateId = (name, form) => {
   // fast refresh preserve useRef value, so that we can skip duplicated field ref waning in fast refresh update
   const idRef = useRef(null)
   const { path, store } = useContext(Context)
   const observer = store?.observer ?? form.observer
-  const [updateId, rerender] = useState(0)
+  const [{ updateId, skipValidation }, rerender] = useReducer(reducer, {
+    updateId: 0,
+    skipValidation: false,
+  })
   const fieldRef = useMemo(() => {
     if (name instanceof FieldRef) {
       return name
@@ -23,13 +30,13 @@ export const useFieldWithUpdateId = (name, form) => {
   useEffect(() => {
     return observer.listen(
       UPDATE,
-      () => {
-        rerender((x) => x + 1)
+      (skipValidation = false) => {
+        rerender(skipValidation)
       },
       fieldRef,
     )
   })
-  return [fieldRef, updateId]
+  return [fieldRef, updateId, skipValidation]
 }
 
 const useField = (name, form) => {
