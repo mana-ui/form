@@ -111,4 +111,27 @@ describe("validator", () => {
       expect(handleSubmit).toHaveBeenCalled()
     })
   })
+  test("validators run one by one in chronological order, unexpected error won't get thrown until previous validator passed.", async () => {
+    render(
+      <App>
+        <Field
+          name="f"
+          label="F"
+          validators={{
+            required: (v) => v === "" && <span>F is required</span>,
+            latter: () => {
+              throw new Error("unexpected error")
+            },
+          }}
+          required
+          latter
+        />
+      </App>,
+    )
+    const input = screen.getByLabelText(/F/)
+    userEvent.type(input, "{backspace}")
+    await waitFor(() => {
+      expect(screen.getByText("F is required")).toBeInTheDocument()
+    })
+  })
 })
