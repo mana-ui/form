@@ -24,7 +24,7 @@ const ListField = ({ listField, children }) => {
   useEffect(() =>
     context.store.observer.listen(SUBMIT_VALIDATE, handleSubmit, context.path),
   )
-  return items.map((item) => {
+  return items.map((item, i) => {
     return (
       <Context.Provider
         key={item.key}
@@ -33,7 +33,7 @@ const ListField = ({ listField, children }) => {
           path: item,
         }}
       >
-        {children(item)}
+        {children(item, i)}
       </Context.Provider>
     )
   })

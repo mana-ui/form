@@ -9,10 +9,10 @@ import useListField from "../src/useListField"
 describe("ListField", () => {
   test("define by string path", async () => {
     console.error = jest.fn()
-    const Item = ({ remove }) => (
+    const Item = ({ remove, i }) => (
       <span>
         <Field name="a" label="A" />
-        <button onClick={remove}>remove</button>
+        <button onClick={remove}>remove {i}</button>
       </span>
     )
     const List = ({ name }) => {
@@ -22,7 +22,9 @@ describe("ListField", () => {
           <span onClick={() => list.append({ a: "a3" })}>Append</span>
           <span onClick={() => list.prepend({ a: "a4" })}>Prepend</span>
           <span onClick={() => list.clear()}>Clear</span>
-          <ListField>{(item) => <Item remove={item.remove} />}</ListField>
+          <ListField>
+            {(item, i) => <Item remove={item.remove} i={i} />}
+          </ListField>
         </>
       )
     }
@@ -43,8 +45,8 @@ describe("ListField", () => {
     await waitFor(() => {
       expect(screen.getAllByLabelText("A")).toHaveLength(3)
     })
-    const removes = screen.getAllByText("remove")
-    userEvent.click(removes[1])
+    const remove1 = screen.getByText("remove 1")
+    userEvent.click(remove1)
     await waitFor(() => {
       expect(screen.getAllByLabelText("A")).toHaveLength(2)
     })
