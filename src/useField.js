@@ -3,6 +3,8 @@ import { UPDATE } from "./events"
 import FieldRef from "./FieldRef"
 import { Context } from "./Form"
 import idGenFn from "./idGenFn"
+import invariant from "invariant"
+import { join } from "./path"
 
 const idGen = idGenFn()
 
@@ -11,10 +13,18 @@ function reducer({ updateId }, skipValidation) {
 }
 
 export const useFieldWithUpdateId = (name, form) => {
+  const context = useContext(Context)
+  form = form ?? context.store
+  invariant(
+    !!form,
+    `No form instance avaiable from useField of ${join(
+      context.path?.fullPath,
+      name,
+    )}`,
+  )
   // fast refresh preserve useRef value, so that we can skip duplicated field ref waning in fast refresh update
   const idRef = useRef(null)
-  const { path, store } = useContext(Context)
-  const observer = store?.observer ?? form.observer
+  const observer = form.observer
   const [{ updateId, skipValidation }, rerender] = useReducer(reducer, {
     updateId: 0,
     skipValidation: false,
@@ -24,9 +34,9 @@ export const useFieldWithUpdateId = (name, form) => {
       return name
     }
     idRef.current = idRef.current ?? idGen.next().value
-    const ctxField = path ?? form.rootField
+    const ctxField = context.path ?? form.rootField
     return ctxField.extend(name, { hookId: idRef.current })
-  }, [name, path, form])
+  }, [name, context.path, form])
   useEffect(() => {
     return observer.listen(
       UPDATE,
@@ -36,12 +46,11 @@ export const useFieldWithUpdateId = (name, form) => {
       fieldRef,
     )
   })
-  return [fieldRef, updateId, skipValidation]
+  return [fieldRef, updateId, skipValidation, context]
 }
 
 const useField = (name, form) => {
-  const { store } = useContext(Context)
-  const [fieldRef] = useFieldWithUpdateId(name, form ?? store)
+  const [fieldRef] = useFieldWithUpdateId(name, form)
   return fieldRef
 }
 

@@ -1,5 +1,4 @@
-import { useContext, useState, useEffect, useRef } from "react"
-import { Context } from "./Form"
+import { useState, useEffect, useRef } from "react"
 import { SUBMIT_VALIDATE, VALIDATE } from "./events"
 import { VALIDATION_ERROR } from "./constants"
 import { useFieldWithUpdateId } from "./useField"
@@ -11,9 +10,10 @@ export default function useFieldControl(
   options = { disabled: false },
   props,
 ) {
-  const [fieldRef, updateId, skipValidation] = useFieldWithUpdateId(name)
   const { disabled } = options
-  const context = useContext(Context)
+  const [fieldRef, updateId, skipValidation, context] = useFieldWithUpdateId(
+    name,
+  )
   const { store, path: ctxField, validators: ctxValidators } = context
   const { observer } = store
   const v = {
