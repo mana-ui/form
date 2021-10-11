@@ -8,6 +8,30 @@ import { join } from "./path"
 
 const idGen = idGenFn()
 
+const useFieldRefWithHookId = (name, ctxFieldRef) => {
+  // fast refresh preserve useRef value, so that we can skip duplicated field ref waning in fast refresh update
+  const idRef = useRef(null)
+  const fieldRef = useMemo(() => {
+    if (name instanceof FieldRef) {
+      return name
+    }
+    idRef.current = idRef.current ?? idGen.next().value
+    const fieldRef = ctxFieldRef.extend(name, { hookId: idRef.current })
+    if (name && fieldRef.hookId !== idRef.current) {
+      console.error(`fieldRef of '${fieldRef.fullName}' already exists`)
+    }
+    return fieldRef
+  }, [name, ctxFieldRef])
+  useEffect(() => {
+    return () => {
+      if (idRef.current !== null) {
+        fieldRef.hookId = null
+      }
+    }
+  }, [fieldRef])
+  return fieldRef
+}
+
 function reducer({ updateId }, skipValidation) {
   return { updateId: updateId + 1, skipValidation }
 }
@@ -22,21 +46,12 @@ export const useFieldWithUpdateId = (name, form) => {
       name,
     )}`,
   )
-  // fast refresh preserve useRef value, so that we can skip duplicated field ref waning in fast refresh update
-  const idRef = useRef(null)
   const observer = form.observer
   const [{ updateId, skipValidation }, rerender] = useReducer(reducer, {
     updateId: 0,
     skipValidation: false,
   })
-  const fieldRef = useMemo(() => {
-    if (name instanceof FieldRef) {
-      return name
-    }
-    idRef.current = idRef.current ?? idGen.next().value
-    const ctxField = context.path ?? form.rootField
-    return ctxField.extend(name, { hookId: idRef.current })
-  }, [name, context.path, form])
+  const fieldRef = useFieldRefWithHookId(name, context.path ?? form.rootField)
   useEffect(() => {
     return observer.listen(
       UPDATE,
