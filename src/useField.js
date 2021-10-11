@@ -40,7 +40,8 @@ export const useFieldWithUpdateId = (name, form) => {
 }
 
 const useField = (name, form) => {
-  const [fieldRef] = useFieldWithUpdateId(name, form)
+  const { store } = useContext(Context)
+  const [fieldRef] = useFieldWithUpdateId(name, form ?? store)
   return fieldRef
 }
 
