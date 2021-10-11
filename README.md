@@ -38,22 +38,44 @@ form.get('b') // returns 'update b'
 
 3. associate update:
 
-use form.listen to subscribe a field update, and update other fields:
+When it comes to associate update, we need a way to represent the related fields, in mana form we take the concept of field ref:
+
+```javascript
+const form = useForm({})
+const field = useField('a', form) // get field ref of field 'a', form is not required in a nested child of Form
+<Field name={field} /> // field ref can passed to name prop
+```
+
+You should use field ref if a field is used in multiple place, rather than literal field path, field ref warns if you declare a field multiple times by literal field path:
+
+```javascript
+const field = useField('a')
+<Field name="a"/> // warning: field a already exists
+```
+
+Keep use the same field ref have some advantages:
+
+- field ref is a one-to-one map to a field
+- easy to track the field by an explicit variable
+- easy to change field path
+- set field value programatically
+
+Since we have field ref, we can use form.listen to subscribe source field update, and update target field:
 
 ```javascript
 const App = () => {
-  const form = useForm({ a: "", b: "" })
-  const A = form.field("a")
-  const B = form.field("b")
+  const form = useForm({ source: "", target: "" })
+  const SOURCE = form.field("source")
+  const TARGET = form.field("target")
   useEffect(() =>
     form.listen((v) => {
-      B.value = v // won't trigger validation
-    }, A),
+      TARGET.value = v // won't trigger validation
+    }, SOURCE),
   )
   return (
     <Form init={form}>
-      <Field name={A} label="A" />
-      <Field name={B} label="B" />
+      <Field name={SOURCE} label="Source" />
+      <Field name={TARGET} label="Target" />
     </Form>
   )
 }
