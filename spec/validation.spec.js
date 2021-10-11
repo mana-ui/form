@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event"
 import React, { useState } from "react"
 import { Field } from "../src/"
 import App from "./App"
-import { useForm } from "../src/index"
+import { useForm, useField } from "../src/index"
 
 describe("validator", () => {
   test("inline validator", async () => {
@@ -74,7 +74,7 @@ describe("validator", () => {
     const Container = () => {
       const [disabled, setDisabled] = useState(false)
       const form = useForm({ f: "" })
-      const f = form.field("f")
+      const f = useField("f", form)
       return (
         <App
           initValue={form}

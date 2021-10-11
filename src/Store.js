@@ -52,6 +52,7 @@ class Store {
     this.observer.emit(UPDATE, field, this.skipValidation)
   }
   field(path) {
+    console.error("form.field is deprecated, use useField instead")
     const pathes = path.split(".")
     let field = this.rootField
     for (const p of pathes) {
