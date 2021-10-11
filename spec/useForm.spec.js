@@ -1,9 +1,7 @@
 import React, { useEffect, useRef } from "react"
 import { render, screen, waitFor } from "@testing-library/react"
-import Field from "../src/Field"
-import Form from "../src/Form"
-import useForm from "../src/useForm"
 import userEvent from "@testing-library/user-event"
+import { Form, Field, useForm, useField } from "../src"
 
 describe("useForm", () => {
   const initValue = { a: "hello" }
@@ -11,7 +9,7 @@ describe("useForm", () => {
     const handleSubmit = jest.fn()
     const Container = () => {
       const form = useForm(initValue)
-      const a = form.field("a")
+      const a = useField("a", form)
       const prevFormRef = useRef(form)
       useEffect(() => {
         prevFormRef.current = form

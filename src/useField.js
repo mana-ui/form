@@ -3,30 +3,55 @@ import { UPDATE } from "./events"
 import FieldRef from "./FieldRef"
 import { Context } from "./Form"
 import idGenFn from "./idGenFn"
+import invariant from "invariant"
+import { join } from "./path"
 
 const idGen = idGenFn()
+
+const useFieldRefWithHookId = (name, ctxFieldRef) => {
+  // fast refresh preserve useRef value, so that we can skip duplicated field ref waning in fast refresh update
+  const idRef = useRef(null)
+  const fieldRef = useMemo(() => {
+    if (name instanceof FieldRef) {
+      return name
+    }
+    idRef.current = idRef.current ?? idGen.next().value
+    const fieldRef = ctxFieldRef.extend(name, { hookId: idRef.current })
+    if (name && fieldRef.hookId !== idRef.current) {
+      console.error(`fieldRef of '${fieldRef.fullName}' already exists`)
+    }
+    return fieldRef
+  }, [name, ctxFieldRef])
+  useEffect(() => {
+    return () => {
+      if (idRef.current !== null) {
+        fieldRef.hookId = null
+      }
+    }
+  }, [fieldRef])
+  return fieldRef
+}
 
 function reducer({ updateId }, skipValidation) {
   return { updateId: updateId + 1, skipValidation }
 }
 
 export const useFieldWithUpdateId = (name, form) => {
-  // fast refresh preserve useRef value, so that we can skip duplicated field ref waning in fast refresh update
-  const idRef = useRef(null)
-  const { path, store } = useContext(Context)
-  const observer = store?.observer ?? form.observer
+  const context = useContext(Context)
+  form = form ?? context.store
+  invariant(
+    !!form,
+    `No form instance avaiable from useField of ${join(
+      context.path?.fullPath,
+      name,
+    )}`,
+  )
+  const observer = form.observer
   const [{ updateId, skipValidation }, rerender] = useReducer(reducer, {
     updateId: 0,
     skipValidation: false,
   })
-  const fieldRef = useMemo(() => {
-    if (name instanceof FieldRef) {
-      return name
-    }
-    idRef.current = idRef.current ?? idGen.next().value
-    const ctxField = path ?? form.rootField
-    return ctxField.extend(name, { hookId: idRef.current })
-  }, [name, path, form])
+  const fieldRef = useFieldRefWithHookId(name, context.path ?? form.rootField)
   useEffect(() => {
     return observer.listen(
       UPDATE,
@@ -36,7 +61,7 @@ export const useFieldWithUpdateId = (name, form) => {
       fieldRef,
     )
   })
-  return [fieldRef, updateId, skipValidation]
+  return [fieldRef, updateId, skipValidation, context]
 }
 
 const useField = (name, form) => {

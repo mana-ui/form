@@ -75,6 +75,7 @@ describe("FieldSet", () => {
     })
   })
   test("fieldset validator", async () => {
+    console.error = jest.fn()
     render(
       <App initValue={{ a: "a", b: "b" }}>
         {({ submit }) => (
@@ -113,5 +114,6 @@ describe("FieldSet", () => {
     await waitFor(() => {
       expect(screen.getByText("A and B should be same")).toBeInTheDocument()
     })
+    expect(console.error).not.toHaveBeenCalled()
   })
 })

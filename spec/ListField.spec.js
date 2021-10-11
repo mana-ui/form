@@ -5,6 +5,7 @@ import { Field, useForm } from "../src"
 import { screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import useListField from "../src/useListField"
+import useField from "../src/useField"
 
 describe("ListField", () => {
   test("define by string path", async () => {
@@ -63,12 +64,15 @@ describe("ListField", () => {
   })
   test("define by field instance", async () => {
     console.error = jest.fn()
-    const Item = ({ remove }) => (
-      <span>
-        <Field name="a" label="A" />
-        <button onClick={remove}>remove</button>
-      </span>
-    )
+    const Item = ({ remove }) => {
+      const A = useField("a")
+      return (
+        <span>
+          <Field name={A} label="A" />
+          <button onClick={remove}>remove</button>
+        </span>
+      )
+    }
     const Container = () => {
       const form = useForm({ arr: [{ a: "a1" }, { a: "a2" }] })
       const [ListField, list] = useListField("arr", form)

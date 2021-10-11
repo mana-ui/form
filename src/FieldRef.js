@@ -34,8 +34,8 @@ class FieldRef {
     let fieldRef
     if (this.children.has(fullName)) {
       fieldRef = this.children.get(fullName)
-      if (hookId && name && fieldRef.hookId !== hookId) {
-        console.error(`fieldRef of '${fullName}' already exists`)
+      if (fieldRef.hookId === null) {
+        fieldRef.hookId = hookId
       }
     } else {
       fieldRef = new FieldRef(this, name, getPath, hookId)
