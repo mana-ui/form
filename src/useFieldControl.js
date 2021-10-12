@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react"
-import { SUBMIT_VALIDATE, VALIDATE } from "./events"
 import { VALIDATION_ERROR } from "./constants"
+import { SUBMIT_VALIDATE, VALIDATE } from "./events"
 import { useFieldWithUpdateId } from "./useField"
 
 export default function useFieldControl(
@@ -11,9 +11,13 @@ export default function useFieldControl(
   props,
 ) {
   const { disabled } = options
-  const [fieldRef, updateId, skipValidation, context] = useFieldWithUpdateId(
-    name,
-  )
+  const [
+    fieldRef,
+    updateId,
+    skipValidation,
+    context,
+    rerender,
+  ] = useFieldWithUpdateId(name)
   const { store, path: ctxField, validators: ctxValidators } = context
   const { observer } = store
   const v = {
@@ -21,6 +25,7 @@ export default function useFieldControl(
     ...validators,
   }
   const handleSubmit = async () => {
+    rerender()
     if (fieldRef !== ctxField) {
       await observer.emit(SUBMIT_VALIDATE, fieldRef)
     }
@@ -28,10 +33,9 @@ export default function useFieldControl(
   }
   useEffect(() => observer.listen(SUBMIT_VALIDATE, handleSubmit, ctxField))
 
-  const validate = useRef()
-  useEffect(() => observer.listen(VALIDATE, () => validate.current(), fieldRef))
+  useEffect(() => observer.listen(VALIDATE, validate.current, fieldRef))
   const [error, setError] = useState(null)
-  const selfValidate = async () => {
+  const selfValidate = async (abortSignal) => {
     if (disabled) {
       return
     }
@@ -39,32 +43,48 @@ export default function useFieldControl(
     try {
       for (const [rule, param] of Object.entries(rules)) {
         const error = (await v[rule]?.(newValue, param, props)) || null
+        if (abortSignal?.abort) {
+          return
+        }
         if (error) {
           throw { error, type: VALIDATION_ERROR }
         }
       }
       setError(null)
     } catch (error) {
-      if (error.type === VALIDATION_ERROR) setError(error.error)
+      if (error.type === VALIDATION_ERROR) {
+        setError(error.error)
+      }
       throw error
     }
   }
-  validate.current = async () => {
+  const validate = useRef()
+  validate.current = async (childError, abortSignal) => {
     try {
-      await selfValidate()
+      let error = childError
+      if (childError === null) {
+        try {
+          error = (await selfValidate(abortSignal)) ?? null
+        } catch (e) {
+          if (e.type === VALIDATION_ERROR) error = e.error
+          else throw e
+        }
+      }
       if (fieldRef !== ctxField) {
-        return observer.emit(VALIDATE, ctxField)
+        return observer.emit(VALIDATE, ctxField, error)
       }
       // eslint-disable-next-line no-empty
     } catch (e) {}
   }
   useEffect(() => {
-    if (updateId && !skipValidation) {
-      validate.current()
+    const abortSignal = { abort: false }
+    validate.current(null, abortSignal)
+    return () => {
+      abortSignal.abort = true
     }
-  }, [updateId, skipValidation])
+  }, [updateId])
   return {
-    error,
+    error: updateId && !skipValidation ? error : null,
     context: {
       ...context,
       path: fieldRef,

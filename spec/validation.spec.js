@@ -7,45 +7,60 @@ import { useForm, useField } from "../src/index"
 
 describe("validator", () => {
   test("inline validator", async () => {
-    render(
-      <App>
-        <Field
-          name="f"
-          label="F"
-          validators={{
-            required: (v) => v === "" && <span>F is required</span>,
-            maxLength: (v, max) => v.length > max && "F exceeds max length",
-          }}
-          required
-          maxLength={5}
-        />
-      </App>,
-    )
-    const input = screen.getByLabelText(/F/)
-    userEvent.type(input, "{backspace}")
+    const Container = () => {
+      const form = useForm({ f: "" })
+      return (
+        <App init={form}>
+          <Field
+            name="f"
+            label="F"
+            validators={{
+              required: (v) => v === "" && <span>F is required</span>,
+              maxLength: (v, max) => v.length > max && "F exceeds max length",
+            }}
+            required
+            maxLength={5}
+          />
+          {form.valid || <span>invalid</span>}
+          <button onClick={form.submit}>submit</button>
+        </App>
+      )
+    }
+    render(<Container />)
+    expect(screen.queryByText("F is required")).not.toBeInTheDocument()
+    expect(screen.getByText("invalid")).toBeInTheDocument()
+    const submit = screen.getByText("submit")
+    userEvent.click(submit)
     await waitFor(() => {
       expect(screen.getByText("F is required")).toBeInTheDocument()
     })
+    const input = screen.getByLabelText(/F/)
     userEvent.type(input, "abc")
     await waitFor(() => {
       expect(screen.queryByText("F is required")).not.toBeInTheDocument()
+      expect(screen.queryByText("invalid")).not.toBeInTheDocument()
     })
     userEvent.type(input, "def")
     await waitFor(() => {
       expect(screen.getByText("F exceeds max length")).toBeInTheDocument()
+      expect(screen.queryByText("invalid")).toBeInTheDocument()
     })
     userEvent.type(input, "{backspace}")
     await waitFor(() => {
       expect(screen.queryByText("F exceeds max length")).not.toBeInTheDocument()
+      expect(screen.queryByText("invalid")).not.toBeInTheDocument()
     })
   })
   test("validators from higher component", async () => {
     render(
       <App
         validators={{
-          required: (v, _, { label }) => v === "" && <>{label} is required</>,
-          maxLength: (v, max, { label }) =>
-            v.length > max && <>{label} exceeds max length</>,
+          required: (v, _, { label }) => {
+            return v === "" && <>{label} is required</>
+          },
+          maxLength: (v, max, { label }) => {
+            return v.length > max && <>{label} exceeds max length</>
+          },
         }}
       >
         <Field name="f" label="F" required maxLength={5} />
@@ -83,20 +98,16 @@ describe("validator", () => {
             required: (v) => v === "" && "F is required",
           }}
         >
-          {({ submit }) => (
-            <>
-              <Field fieldRef={f} label="F" disabled={disabled} required />
-              <button
-                onClick={() => {
-                  setDisabled(true)
-                  f.value = ""
-                }}
-              >
-                toggle
-              </button>
-              <button onClick={submit}>submit</button>
-            </>
-          )}
+          <Field fieldRef={f} label="F" disabled={disabled} required />
+          <button
+            onClick={() => {
+              setDisabled(true)
+              f.value = ""
+            }}
+          >
+            toggle
+          </button>
+          <button onClick={form.submit}>submit</button>
         </App>
       )
     }

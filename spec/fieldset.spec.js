@@ -40,6 +40,7 @@ describe("FieldSet", () => {
             {error}
           </div>
         )}
+        onSubmit={() => {}}
       >
         <FieldSet name="a">
           <Field name="b" label="AB" />
