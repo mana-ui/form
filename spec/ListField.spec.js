@@ -129,15 +129,23 @@ describe("ListField", () => {
       return (
         <App initValue={form} onSubmit={handleSubmit}>
           <ListField>{(item) => <Item remove={item.remove} />}</ListField>
+          {form.valid || <span>invalid</span>}
           <button onClick={form.submit}>Submit</button>
         </App>
       )
     }
     render(<Container />)
+    expect(screen.getByText("invalid")).toBeInTheDocument()
     userEvent.click(screen.getByRole("button", { name: "Submit" }))
     await waitFor(() => {
       expect(screen.queryByText("A is required")).toBeInTheDocument()
     })
     expect(handleSubmit).not.toHaveBeenCalled()
+    const input = screen.getByLabelText("A")
+    userEvent.type(input, "a1")
+    await waitFor(() => {
+      expect(screen.queryByText("A is required")).not.toBeInTheDocument()
+      expect(screen.queryByText("invalid")).not.toBeInTheDocument()
+    })
   })
 })
