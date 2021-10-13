@@ -252,6 +252,21 @@ A validator is a function returns a message when a rule is not fullfilled. A val
 
 You can decide how error is shown by fieldRender.
 
+### form.valid
+
+You may use _form.valid_ to get form validation state. It may be used to disabled submit button.
+
+```javascript
+const App = () => {
+  const form = useForm({})
+  return form.valid ? (
+    <span>all fields valid</span>
+  ) : (
+    <span>some field invalid</span>
+  )
+}
+```
+
 ## Submit
 
 Form provides sumbit callback by children render prop, when it's called, all enabled validators get invoked, if anyone fails, onSubmit is skipped, otherwise onSubmit is called with form data.

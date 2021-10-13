@@ -64,7 +64,6 @@ class Store {
     try {
       await this.observer.emit(SUBMIT_VALIDATE, this.rootField)
       this.observer.emit(SUBMIT)
-      // eslint-disable-next-line no-empty
     } catch (e) {
       if (e.type !== VALIDATION_ERROR) {
         throw e

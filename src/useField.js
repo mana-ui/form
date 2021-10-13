@@ -61,7 +61,7 @@ export const useFieldWithUpdateId = (name, form) => {
       fieldRef,
     )
   })
-  return [fieldRef, updateId, skipValidation, context]
+  return [fieldRef, updateId, skipValidation, context, rerender]
 }
 
 const useField = (name, form) => {
