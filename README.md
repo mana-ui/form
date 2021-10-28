@@ -217,7 +217,11 @@ const customRender = (className) => ({ Control, labelElem, id }) => (
 
 ## Validation & Errors
 
-You may define validators by `validators` prop, and use validators by props other than Field used props:
+### Field-level Validation
+
+Mana form provides a concise declarative way to define field-level fields.
+
+It includes two parts to perform a validation on a field: 1. pass an object of validator functions to `validators` prop of Field, which keys can't be Field self-used props, and 2. enable a validator by passing the keys in validators as a prop of Field:
 
 ```javascript
 <Form
@@ -248,9 +252,31 @@ You may define validators by `validators` prop, and use validators by props othe
 </Form>
 ```
 
-A validator is a function returns a message when a rule is not fullfilled. A validator is enabled when a prop same as the key. The validator function will be invoked with the field value as the first argument and the prop value as the second argument. Enabled validators on a Field will be called by chronological order defined on props.
+`validators` are available to all nested `Field`s, so you may just define a validator function only once.
+
+The validator function receives the field value as the first argument and the prop value as the second argument.
+
+Enabled validators on a Field will be called by chronological order defined in Field props.
 
 You can decide how error is shown by fieldRender.
+
+### Form-level Validation
+
+You may validate on submit in `onSubmit` callback.
+
+```jsx
+<Form
+  onSubmit={(values) => {
+    if (!values.name) {
+      // do something
+      return
+    }
+    // pass the validation, continue to submit
+  }}
+>
+  {/*fields*/}
+</Form>
+```
 
 ### form.valid
 
