@@ -36,22 +36,26 @@ function reducer({ updateId }, skipValidation) {
   return { updateId: updateId + 1, skipValidation }
 }
 
-export const useFieldWithUpdateId = (name, form) => {
+const useFieldContext = (form) => {
   const context = useContext(Context)
-  form = form ?? context.store
+  return form ? [{}, form] : [context, context.store]
+}
+
+export const useFieldWithUpdateId = (name, form) => {
+  const [context, store] = useFieldContext(form)
   invariant(
-    !!form,
+    !!store,
     `No form instance avaiable from useField of ${join(
       context.path?.fullPath,
       name,
     )}`,
   )
-  const observer = form.observer
+  const observer = store.observer
   const [{ updateId, skipValidation }, rerender] = useReducer(reducer, {
     updateId: 0,
     skipValidation: false,
   })
-  const fieldRef = useFieldRefWithHookId(name, context.path ?? form.rootField)
+  const fieldRef = useFieldRefWithHookId(name, context.path ?? store.rootField)
   useEffect(() => {
     return observer.listen(
       UPDATE,

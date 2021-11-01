@@ -38,4 +38,23 @@ describe("useField", () => {
       "No form instance avaiable from useField of someField",
     )
   })
+  it("works in nested Form", () => {
+    const Comp = ({ children, name }) => {
+      const form = useForm({ [name]: name })
+      const field = useField(name, form)
+      return (
+        <App init={form}>
+          <Field name={field} label={name} />
+          {children}
+        </App>
+      )
+    }
+    render(
+      <Comp name="outter">
+        <Comp name="inner" />
+      </Comp>,
+    )
+    expect(screen.getByLabelText("outter")).toHaveValue("outter")
+    expect(screen.getByLabelText("inner")).toHaveValue("inner")
+  })
 })
