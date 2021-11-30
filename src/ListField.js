@@ -12,7 +12,6 @@ const ListField = ({ listField, children }) => {
         return join(ctxPath, listField[KEYS].indexOf(k))
       },
     })
-    item.key = k
     item.remove = () => listField.remove(i)
     return item
   })
@@ -40,7 +39,7 @@ const ListField = ({ listField, children }) => {
   return items.map((item, i) => {
     return (
       <Context.Provider
-        key={item.key}
+        key={item.name}
         value={{
           ...context,
           path: item,

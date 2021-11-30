@@ -2,6 +2,7 @@ import React, { useMemo, useRef } from "react"
 import idGenFn from "./idGenFn"
 import KEYS from "./keysSymbol"
 import ListField from "./ListField"
+import { join } from "./path"
 import { useFieldWithUpdateId } from "./useField"
 
 const useListField = (field, form) => {
@@ -27,14 +28,19 @@ const useListField = (field, form) => {
         fieldRef.value = [...value, v]
       },
       remove(i) {
+        const key = fieldRef[KEYS][i]
         fieldRef[KEYS].splice(i, 1)
         const value = fieldRef.value ?? []
+        fieldRef.children.delete(join(fieldRef.fullName, key))
         value.splice(i, 1)
         fieldRef.value = value
       },
       clear() {
         fieldRef[KEYS] = []
         fieldRef.value = []
+      },
+      fields() {
+        return [...fieldRef.children.values()]
       },
     })
     if (!listFieldRef.current || listField !== listFieldRef.current) {

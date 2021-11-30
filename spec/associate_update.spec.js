@@ -1,4 +1,4 @@
-import React, { useEffect } from "react"
+import React from "react"
 import { render, screen, waitFor } from "@testing-library/react"
 import App from "./App"
 import Field from "../src/Field"
@@ -12,11 +12,6 @@ describe("associate_update", () => {
       const form = useForm({ a: "", b: "" })
       const a = form.field("a")
       const b = form.field("b")
-      useEffect(() =>
-        form.listen((v) => {
-          b.value = v
-        }, a),
-      )
       if (a.value !== "" && b.value === "") {
         throw new Error("a & b update in different render")
       }
@@ -30,16 +25,15 @@ describe("associate_update", () => {
           <Field
             name="a"
             label="A"
-            control={({ field: a }) => (
-              <input
-                value={"$" + a.value}
-                onChange={({ target: { value } }) => {
-                  const v = value.substring(1)
-                  a.value = v
-                }}
-              />
+            onChange={({ target: { value } }) => {
+              a.value = value.substring(1)
+              b.value = a.value
+            }}
+          >
+            {({ value, onChange }) => (
+              <input value={"$" + value} onChange={onChange} />
             )}
-          />
+          </Field>
           <Field name="b" label="B" required />
         </App>
       )

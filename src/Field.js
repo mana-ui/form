@@ -24,6 +24,7 @@ const Field = (props) => {
     render,
     validators = {},
     disabled,
+    onChange,
     ...rules
   } = props
   const { context, error, fieldRef } = useFieldControl(
@@ -37,20 +38,31 @@ const Field = (props) => {
   )
   const r = render || context.fieldRender || defaultRender
   const c = children ?? control ?? context.control ?? defaultControl
-  const formProps = { disabled }
+  const formProps = { disabled, value: fieldRef.value }
+  if (children) {
+    formProps.onChange = (value) => {
+      context.store.batch(
+        onChange
+          ? () => onChange(value)
+          : () => {
+              fieldRef.value = value
+            },
+      )
+    }
+  } else {
+    formProps.onChange = ({ target: { value } }) => {
+      context.store.batch(
+        onChange
+          ? () => onChange(value)
+          : () => {
+              fieldRef.value = value
+            },
+      )
+    }
+  }
   if (typeof c === "function") {
     formProps.field = fieldRef
-  } else {
     formProps.value = fieldRef.value
-    if (children) {
-      formProps.onChange = (value) => {
-        fieldRef.value = value
-      }
-    } else {
-      formProps.onChange = ({ target: { value } }) => {
-        fieldRef.value = value
-      }
-    }
   }
 
   const Control = useComponent(c, formProps)

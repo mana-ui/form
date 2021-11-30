@@ -1,5 +1,26 @@
 import { join } from "./path"
 
+// class IndexedMap {
+//   constructor() {
+//     this.arr = []
+//   }
+//   has(key) {
+//     return this.arr.some(([k]) => k === key)
+//   }
+//   get(key) {
+//     return this.arr.find(( [k] ) => k === key)?.[1]
+//   }
+//   set(key, value) {
+//     const entry = this.get(key)
+//     if (entry) {
+//       entry[1] = value
+//     } else {
+//       this.arr.push([key, value])
+//     }
+//     return this
+//   }
+// }
+
 class FieldRef {
   static createRoot(store) {
     const field = new FieldRef()
@@ -10,7 +31,11 @@ class FieldRef {
     this.store = parent?.store
     this.parent = parent
     this.name = name
-    this.getPath = getPath ?? (() => join(this.parent?.fullPath, this.name))
+    this.getPath =
+      getPath ??
+      (() => {
+        return join(this.parent?.fullPath, this.name)
+      })
     this.children = new Map()
     this.hookId = hookId
   }
@@ -26,14 +51,17 @@ class FieldRef {
   set value(v) {
     this.store.set(v, this)
   }
-  extend(name, { hookId, getPath } = {}) {
+  field(name) {
     const fullName = join(this.fullName, name)
     if (this.fullName === fullName) {
       return this
     }
-    let fieldRef
-    if (this.children.has(fullName)) {
-      fieldRef = this.children.get(fullName)
+    return this.children.get(fullName)
+  }
+  extend(name, { hookId, getPath } = {}) {
+    const fullName = join(this.fullName, name)
+    let fieldRef = this.field(name)
+    if (fieldRef) {
       if (fieldRef.hookId === null) {
         fieldRef.hookId = hookId
       }
@@ -41,7 +69,7 @@ class FieldRef {
       fieldRef = new FieldRef(this, name, getPath, hookId)
       this.children.set(fullName, fieldRef)
     }
-    return this.children.get(fullName)
+    return fieldRef
   }
 }
 
